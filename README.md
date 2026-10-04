@@ -22,20 +22,20 @@ Pages stay on your machine; nothing is posted to GitHub.
 
 ## Install
 
-Requirements: Python 3.9 or newer, git, and the GitHub CLI (`gh auth login`) for PRs.
+Requirements: git, Python 3.9 or newer, and the GitHub CLI (`gh auth login`) for PRs.
 
 ```bash
-git clone https://github.com/krishhgg/pr-walkthrough.git ~/src/pr-walkthrough
-
-# Claude Code (every project)
-ln -s ~/src/pr-walkthrough/pr-walkthrough ~/.claude/skills/pr-walkthrough
-# Claude Code (one project only): put the folder in <project>/.claude/skills/ instead
-
-# Codex
-ln -s ~/src/pr-walkthrough/pr-walkthrough ~/.codex/skills/pr-walkthrough
+git clone https://github.com/krishhgg/pr-walkthrough.git ~/.local/share/pr-walkthrough
+~/.local/share/pr-walkthrough/install.sh
 ```
 
-`git pull` in `~/src/pr-walkthrough` updates both.
+That makes the skill available to every coding agent on the machine. It links the skill into
+`~/.agents/skills`, which many agents read directly (Codex, Cursor, Gemini CLI, OpenCode, Amp,
+Cline, Factory and others), and into the skills folder of each other agent you have installed
+(Claude Code, Kiro, Qwen Code, Goose, Windsurf, Crush and more). Run `install.sh` again to update.
+
+With Node, the [skills.sh](https://skills.sh) installer works too:
+`npx skills add krishhgg/pr-walkthrough -g` (update with `npx skills update -g`).
 
 ## Use
 
