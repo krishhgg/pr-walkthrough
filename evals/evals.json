@@ -1,0 +1,50 @@
+{
+ "skill_name": "pr-walkthrough",
+ "evals": [
+  {
+   "id": 1,
+   "name": "human-pr-review",
+   "prompt": "I have to review PR #2452 in rocketride-org/rocketride-server today (the GMI Cloud endpoint fix). Can you make me something that walks me through it so I don't have to stare at the raw diff?",
+   "expected_output": "A local HTML walkthrough page for #2452 with a review guide (look-first items with risk, change map), every changed line explained, reasoning labelled as from the PR text or inferred (not the author's notes), checks per behavior change, GitHub comment links, and a reading time near 10 minutes.",
+   "files": [],
+   "assertions": [
+    "Produces an HTML page the user can open locally",
+    "Every file the PR changes is covered on the page",
+    "Points the reviewer to the riskiest places first, each with a reason",
+    "Says where the reasoning comes from (the author vs an inferred reading)",
+    "Links changes to their lines on GitHub so the reviewer can comment",
+    "Gives a concrete thing to check for changes that carry behavior",
+    "Readable in about 10 minutes (no more than about 2,600 open words)"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "stacked-batch",
+   "prompt": "make pr walkthroughs for the two wave PRs #2517 and #2518 in rocketride-org/rocketride-server, the second one is built on the first",
+   "expected_output": "Two walkthrough pages plus an index page; #2518 is detected as stacked on #2517 and its page covers only its own commits; the index shows the stack in reading order.",
+   "files": [],
+   "assertions": [
+    "Produces one HTML page per PR plus an index page",
+    "Recognises that #2518 is built on #2517",
+    "The #2518 page covers only #2518's own changes, not #2517's again",
+    "The index shows the reading order of the stack",
+    "Links changes to their lines on GitHub so the reviewer can comment",
+    "Points the reviewer to the riskiest places first, each with a reason"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "local-branch",
+   "prompt": "before I open a PR, explain what my branch fix/RR-TBD-question-keep-indentation changes compared to develop, in a way my reviewer can follow",
+   "expected_output": "A walkthrough page for the local branch (no GitHub links since there is no PR), every changed line explained, a review guide, reasoning from the commit messages.",
+   "files": [],
+   "assertions": [
+    "Produces an HTML page the user can open locally",
+    "Every file the branch changes is covered on the page",
+    "Points the reviewer to the riskiest places first, each with a reason",
+    "Says where the reasoning comes from (commit messages here, since there is no PR)",
+    "Does not invent a PR number or GitHub links for an unpushed branch"
+   ]
+  }
+ ]
+}

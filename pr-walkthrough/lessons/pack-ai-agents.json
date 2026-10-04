@@ -1,0 +1,416 @@
+{
+  "llm": {
+    "id": "llm",
+    "title": "Large language model (LLM)",
+    "level": 10,
+    "prereqs": [
+      "api"
+    ],
+    "short": "A program trained on huge amounts of text that continues the text it is given. It sees only what is in the prompt.",
+    "body": "<p>A <b>large language model</b>, or LLM, is a program trained on a huge amount of text. Given some text, it writes the text most likely to come next, and that lets it answer questions, write code and follow instructions. GPT, Claude and Gemini are LLMs.</p>\n<p>Two facts about LLMs explain most of the code around them.</p>\n<ul><li>The model sees only what is in the [[prompt|prompt]]. It has no memory of earlier calls. An app must send everything the model needs, such as a file's contents or the chat so far, on every call. If a fact is not in the prompt, the model does not know it, and it may make something up.</li><li>The model returns text and nothing else. It cannot run a program or change a file by itself. When it \"uses a tool\", it writes a request for one, and the app's code does the work (see [[agent|agent]] and [[tool-call|tool call]]).</li></ul>\n<p>The model runs on a [[provider|provider's]] computers, and programs reach it through an [[api|API]]. The same prompt can give a slightly different reply each time, and now and then a broken one, so careful code checks every reply before acting on it.</p>",
+    "example": {
+      "title": "Asking a model a question over HTTP",
+      "code": "response = requests.post(\n    'https://api.anthropic.com/v1/messages',\n    headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01'},\n    json={'model': model, 'max_tokens': 1024,\n          'messages': [{'role': 'user', 'content': 'Summarize this file:\\n' + text}]},\n    timeout=60,\n)\nanswer = response.json()['content'][0]['text']",
+      "notes": [
+        "Sends an HTTP POST request to a model provider and waits for the reply.",
+        "The address of Anthropic's Messages API. Other providers have their own address and request shape.",
+        "The key proves who is asking, and the version picks the request format.",
+        "The model to use, and the most it may write (see [[output-limit|output limit]]).",
+        "The prompt, as one user message. The file's text must be in it, or the model never sees it.",
+        "Gives up after 60 seconds.",
+        "Closes the call.",
+        "Reads the reply text out of the JSON response."
+      ]
+    }
+  },
+  "prompt": {
+    "id": "prompt",
+    "title": "Prompt",
+    "level": 10,
+    "prereqs": [
+      "llm"
+    ],
+    "short": "The full text sent to the model on each call. Apps build it from parts such as a role, rules, tools, data and the request.",
+    "body": "<p>A <b>prompt</b> is everything the [[llm|model]] reads before it answers. The model sees nothing else, so the prompt is the only way to tell it the task, the rules, and what has happened so far.</p>\n<p>Apps rarely write a prompt by hand. Code builds it from parts, in a fixed order. A typical order is this:</p>\n<ol><li>A role or system message, such as \"You are a support assistant for an online shop.\"</li><li>Instructions and rules, including the reply format.</li><li>The [[tool-call|tools]] the model may use, with a description of each.</li><li>Data, such as documents, earlier results and the model's own notes.</li><li>The user's request, last.</li></ol>\n<p>Small wording changes can change behavior. A closing line such as \"Plan the next steps\" can push a model to keep working after it has finished. In review, read a prompt change as you would read code. Check for text sent twice, rules that contradict each other, and data that reaches the prompt with no limit on its size (see [[token|tokens]]).</p>\n<p>When the start of the prompt stays the same on every call, the provider can reuse its work on that start (see [[prompt-cache|prompt caching]]).</p>",
+    "example": {
+      "title": "Building a prompt from parts",
+      "code": "def build_prompt(task, tools, results, notes):\n    parts = ['You are a coding assistant that works step by step.']\n    parts.append('Rules:\\n' + RULES)\n    parts.append('Tools:\\n' + '\\n'.join(json.dumps(t) for t in tools))\n    parts.append('Your notes so far:\\n' + notes)\n    parts.append('Results so far:\\n' + '\\n'.join(results))\n    parts.append('Task: ' + task)\n    return '\\n\\n'.join(parts)",
+      "notes": [
+        "A function that puts the prompt together.",
+        "The role line opens the prompt.",
+        "The rules, including the reply format. RULES is a constant defined elsewhere.",
+        "One JSON line per tool the model may call.",
+        "The model's own notes from the last step.",
+        "Short summaries of earlier tool results.",
+        "The user's request, last.",
+        "Joins the parts with blank lines into one text."
+      ]
+    }
+  },
+  "token": {
+    "id": "token",
+    "title": "Token",
+    "level": 10,
+    "prereqs": [
+      "llm"
+    ],
+    "short": "The unit a model reads, writes and bills by. One token is about 4 characters of English text.",
+    "body": "<p>A model does not read letters or whole words. It reads <b>tokens</b>, chunks of text from a fixed list of tens of thousands of pieces or more. A common word like \"the\" is one token. A rare word is split into several. Code and symbols often cost more tokens per character than plain English. On average, one token is about 4 characters of English.</p>\n<p>Tokens matter for three reasons.</p>\n<ul><li>Cost. Providers charge per token. Input tokens (the prompt) and output tokens (the reply) have separate prices, and output usually costs more.</li><li>Size. A model has a <b>context window</b>, the most tokens it can handle in one call, prompt and reply together.</li><li>Speed. Reading and writing more tokens takes longer.</li></ul>\n<p>An app that resends its whole history on every call pays for that history again each time, so tokens add up fast in a loop. That is why apps keep large data outside the prompt (see [[memory-store|agent memory]]) and show the model short [[summary|summaries]]. The reply has its own cap, the [[output-limit|output limit]]. Each model family splits text a little differently, so exact counts need that model's own tokenizer.</p>",
+    "example": {
+      "title": "Estimating tokens",
+      "code": "text = 'Plan the next set of tool calls, or set done=true if the goal is already met.'\nprint(len(text))\nprint(len(text) // 4)\nhistory_tokens = 6000\nprint(history_tokens * 10)",
+      "notes": [
+        "A 77-character instruction.",
+        "Prints 77, the number of characters.",
+        "Prints 19, the quick estimate at about 4 characters per token.",
+        "Suppose the history shown to the model is 6,000 tokens.",
+        "Ten calls that each resend it read 60,000 input tokens in total."
+      ]
+    }
+  },
+  "output-limit": {
+    "id": "output-limit",
+    "title": "Output limit (max tokens)",
+    "level": 10,
+    "prereqs": [
+      "token"
+    ],
+    "short": "The cap on how many tokens a model may write in one reply. A reasoning model can spend all of it thinking.",
+    "body": "<p>Every model call carries an <b>output limit</b>, the most [[token|tokens]] the model may write in its reply. In a provider's [[api|API]] it is called <code>max_tokens</code> or something close. When the model reaches the limit, the provider stops it mid-sentence and reports why (see [[stop-reason|stop reason]]). Anthropic reports <code>max_tokens</code>, and OpenAI's Chat Completions API reports <code>length</code>.</p>\n<p>The limit protects cost and time, but it can cut a reply short. Half a JSON object is not valid JSON. It gets worse with a [[reasoning-model|reasoning model]], whose private thinking also counts against the output limit. If the thinking uses the whole allowance, the visible reply is empty.</p>\n<p>Code should treat a cut-off reply as its own case. Sending the same prompt again with \"please fix your JSON\" cannot help, because the limit has not changed. A clear error that names the setting to raise saves money and time. Raising a default is not free either. Some providers reject a limit above a model's own cap, so a higher default can break calls that work today.</p>",
+    "example": {
+      "title": "Spotting a reply that hit the limit",
+      "code": "data = response.json()\nif data['stop_reason'] == 'max_tokens':\n    raise OutputLimitError(\n        f'reply cut off at max_tokens={max_tokens}; '\n        'raise max_tokens or ask for a shorter reply'\n    )\ntext = data['content'][0]['text']",
+      "notes": [
+        "The parsed reply from Anthropic's Messages API.",
+        "The provider says the model stopped because it hit the output limit.",
+        "Fails at once with a named error instead of asking again.",
+        "The first part of the message, with the current limit filled in.",
+        "The second part, which names the fix.",
+        "Closes the call.",
+        "Reached only when the reply is complete."
+      ]
+    }
+  },
+  "reasoning-model": {
+    "id": "reasoning-model",
+    "title": "Reasoning model",
+    "level": 10,
+    "prereqs": [
+      "llm"
+    ],
+    "short": "A model that thinks privately before it answers. The thinking helps on hard tasks but uses up output tokens.",
+    "body": "<p>A <b>reasoning model</b> writes out its thinking before it gives its answer. The thinking works like scratch paper. It helps on hard problems, such as planning several steps or fixing code. OpenAI's o-series and GPT-5 models and recent Claude models work this way. Some open models, such as DeepSeek R1, put the thinking in the reply itself, between <code>&lt;think&gt;</code> and <code>&lt;/think&gt;</code> tags. Others keep it separate and may show only a summary.</p>\n<p>Thinking is not free. Thinking tokens count against the [[output-limit|output limit]] and are billed as output. Many providers let you set an effort level, such as low, medium or high. More effort usually means better answers on hard tasks, and more tokens and seconds.</p>\n<p>The risk for code is a reply with no answer in it. If the model is still thinking when it hits the output limit, nothing after the thinking arrives. Code that reads replies should remove complete thinking blocks first, then check whether a block was opened and never closed. That means the model was cut off. The right fix is a bigger limit or less effort, not a retry.</p>",
+    "example": {
+      "title": "Spotting a model that ran out of room while thinking",
+      "code": "text = re.sub(r'<think>.*?</think>', '', reply, flags=re.DOTALL).strip()\nif text.startswith('<think>') and '</think>' not in text:\n    raise ThinkingCutOffError(\n        'model was cut off while thinking; '\n        'raise the output limit or lower the reasoning effort'\n    )",
+      "notes": [
+        "Deletes every complete thinking block, then trims spaces.",
+        "A thinking block was opened but never closed.",
+        "The model ran out of output tokens while thinking, so this raises a named error.",
+        "The first half of the message.",
+        "The second half, which names the fix.",
+        "Closes the call."
+      ]
+    }
+  },
+  "json-mode": {
+    "id": "json-mode",
+    "title": "Asking for JSON",
+    "level": 10,
+    "prereqs": [
+      "json"
+    ],
+    "short": "Asking the model to reply in JSON, then checking and parsing the reply, with a repair request when it is broken.",
+    "body": "<p>A program cannot act on a reply like \"I think I should read the config file next.\" It needs data. So apps ask the model to reply in [[json|JSON]], a text format with a fixed shape that code can read.</p>\n<p>There are a few ways to ask. The [[prompt|prompt]] can describe the shape and ask for JSON only. Many providers also offer structured outputs that follow a JSON schema, and a [[tool-call|tool call]] is itself structured data. Then the code [[parsing|parses]] the reply. If parsing fails, the code can send one repair request that says what was wrong.</p>\n<p>Valid JSON is not the same as usable data. A reply can be perfect JSON and still write <code>\"done\": \"false\"</code> as text, which Python treats as true (see [[truthiness|truthiness]]), or put a string where an object belongs. So careful code checks the shape after parsing. It repairs what has one clear meaning, drops what it cannot use, and tells the model what it dropped.</p>\n<p>Repair calls cost money and time. In review, check that a repair only happens when it can help. An empty reply caused by the [[output-limit|output limit]] will not improve with a request to fix the JSON.</p>",
+    "example": {
+      "title": "Checking the shape of a parsed reply",
+      "code": "def check_plan(reply):\n    problems = []\n    done = reply.get('done')\n    if isinstance(done, str):\n        done = done.strip().lower() == 'true'\n    calls = []\n    for i, c in enumerate(reply.get('tool_calls') or []):\n        if not isinstance(c, dict):\n            problems.append(f'tool_calls[{i}] was not an object')\n            continue\n        calls.append(c)\n    return {'done': done is True, 'tool_calls': calls}, problems",
+      "notes": [
+        "Checks a parsed reply before the app acts on it.",
+        "What had to be dropped, in words the model can act on.",
+        "The model's yes/no answer, in whatever form it sent.",
+        "The model wrote it as text, such as \"false\".",
+        "Turn the text into a real boolean by its meaning.",
+        "The calls that can run.",
+        "Go through the requested calls with their positions.",
+        "A call written as plain text cannot run.",
+        "Record why it was dropped.",
+        "Skip it and keep the good calls.",
+        "Keep the good call.",
+        "Only a real True counts as done."
+      ]
+    }
+  },
+  "agent": {
+    "id": "agent",
+    "title": "Agent",
+    "level": 10,
+    "prereqs": [
+      "llm"
+    ],
+    "short": "A program that loops, asking a model what to do, running the tools it asks for, and showing it the results.",
+    "body": "<p>An [[llm|LLM]] on its own only writes text. An <b>agent</b> is a program wrapped around the model that lets it act. It runs a loop.</p>\n<ol><li>Send the model the task, the list of tools, and everything learned so far.</li><li>Read the reply. Either it asks for some [[tool-call|tool calls]], or it says it is done and gives an answer.</li><li>If it asked for tools, run them and record the results.</li><li>Go back to step 1, now with the new results in the prompt.</li></ol>\n<p>The model makes the decisions. The agent's code does the work and keeps the record. Some agents run one tool per round. Others let the model ask for several independent calls in one reply and run them at the same time, which saves model calls.</p>\n<p>A good agent also handles the model's mistakes, such as a broken reply, a tool that fails, or a model that never says it is done. So the loop has a limit on rounds, records why it stopped (see [[stop-reason|stop reason]]), and has a plan for ending without an answer (see [[fallback|fallback answer]]). In review, trace each way out of the loop.</p>",
+    "example": {
+      "title": "An agent loop, shortened",
+      "code": "stop = 'max_steps'\nfor step in range(max_steps):\n    plan = ask_model(task, tools, history)\n    calls = plan.get('tool_calls') or []\n    if plan.get('done') and not calls:\n        return plan['answer'], 'done'\n    if not calls:\n        stop = 'empty_plan'\n        break\n    results = run_tools(calls)\n    history.append({'step': step, 'calls': calls, 'results': results})\nreturn fallback_answer(task, history), stop",
+      "notes": [
+        "The reason to report if the loop simply runs out of rounds.",
+        "Repeats at most max_steps times, for example 10.",
+        "Steps 1 and 2. Builds the prompt, asks the model, and gets back a checked plan.",
+        "The calls the model asked for, or an empty list.",
+        "The model says it is finished and asks for nothing more.",
+        "Returns its answer and the reason the loop ended.",
+        "Nothing to run, and not done.",
+        "Records why the loop is ending early.",
+        "Leaves the loop.",
+        "Step 3. Runs the calls and gets one result entry per call.",
+        "Step 4. Records the calls and results, so the next prompt shows them.",
+        "Reached when the loop ends without an answer. The fallback writes one from what was gathered."
+      ]
+    }
+  },
+  "tool-call": {
+    "id": "tool-call",
+    "title": "Tool and tool call",
+    "level": 10,
+    "prereqs": [
+      "agent"
+    ],
+    "short": "A request from the model to run a named function with arguments, such as read_file with a file path.",
+    "body": "<p>A <b>tool</b> is a [[function|function]] that an app makes available to the model, such as reading a file, searching the web or running the tests. The model cannot run it. It can only ask. A <b>tool call</b> is that request, a tool name plus arguments, written in the model's reply.</p>\n<p>The model learns which tools exist from the request. Each tool has a name, a description of what it does, and a schema, a [[json|JSON]] description of its arguments. The description matters, because it is all the model knows about when to use the tool.</p>\n<p>The app runs each call and sends the result back in the next message, so the model can read it. Providers write calls in different shapes. Anthropic sends a block with <code>name</code> and <code>input</code>, an object. OpenAI's Chat Completions API sends <code>function.name</code> and <code>function.arguments</code>, a string of JSON text that the app must parse. Code that supports several [[provider|providers]] turns each shape into one of its own.</p>\n<p>In review, check what happens when a call names a tool that does not exist, has arguments that do not parse, or fails. Each should turn into an error the model can read, not a crash.</p>",
+    "example": {
+      "title": "One call in two providers' shapes, read into one shape",
+      "code": "anthropic_block = {'type': 'tool_use', 'id': 'toolu_1', 'name': 'read_file', 'input': {'path': 'README.md'}}\nopenai_call = {'id': 'call_1', 'type': 'function',\n               'function': {'name': 'read_file', 'arguments': '{\"path\": \"README.md\"}'}}\n\ndef to_call(c):\n    if 'function' in c:\n        args = c['function']['arguments']\n        return {'tool': c['function']['name'], 'args': json.loads(args) if args.strip() else {}}\n    return {'tool': c['name'], 'args': c['input']}",
+      "notes": [
+        "A tool call from Anthropic. The arguments are already an object.",
+        "The same call from OpenAI's Chat Completions API.",
+        "Its arguments are JSON text, not an object.",
+        "",
+        "Turns either shape into the app's own shape.",
+        "OpenAI's shape keeps the call under function.",
+        "The arguments as text.",
+        "Parses the text. Empty text means no arguments.",
+        "Anthropic's shape needs no parsing."
+      ]
+    }
+  },
+  "memory-store": {
+    "id": "memory-store",
+    "title": "Agent memory and keys",
+    "level": 10,
+    "prereqs": [
+      "dict"
+    ],
+    "short": "A store outside the prompt where an agent keeps full tool results under keys, while the prompt shows only short summaries.",
+    "body": "<p>A tool result can be large, such as a 100 KB file or a list of 500 rows. Sending all of it in every prompt costs many [[token|tokens]]. So many agents keep the full result outside the prompt, in a <b>memory store</b>, and show the model only a short [[summary|summary]] next to a key, such as <code>step-0.r1</code>.</p>\n<p>The store works like a [[dict|dictionary]]. <code>put(key, value)</code> saves a value, <code>get(key)</code> fetches it, and <code>clear(key)</code> deletes it. The agent then gives the model ways to use stored data without reading all of it.</p>\n<ul><li>A tool that reads part of a stored result, such as the first 20 rows or one field.</li><li>A placeholder the model writes in its answer, such as <code>{{ref:step-0.r1}}</code>, which the app replaces with the stored data before the user sees it.</li><li>A placeholder in a tool argument, which hands stored data straight to the next tool.</li></ul>\n<p>Keys need care. Two runs that share one store must not overwrite each other, so each run's keys often get a prefix with the run's id. In review, check when keys are deleted. An answer that refers to a key must be built before that key is cleared.</p>",
+    "example": {
+      "title": "Storing a result and using it later",
+      "code": "memory.put('step-0.r0', {'path': 'data.csv', 'rows': rows})\nsummary = 'step-0.r0: 500 rows, fields: city, sales'\n\npeek = {'tool': 'memory_read', 'args': {'key': 'step-0.r0', 'path': 'rows[0:5]'}}\nanswer = 'Top cities:\\n\\n{{ref:step-0.r0:table:rows}}'",
+      "notes": [
+        "The agent stores a large result under its key. The model never sees all of it.",
+        "What the model sees instead, a short description next to the key.",
+        "",
+        "A call the model can make to read only the first 5 rows.",
+        "An answer with a placeholder. The app fills in the stored rows as a table before the user sees it."
+      ]
+    }
+  },
+  "summary": {
+    "id": "summary",
+    "title": "Structural summary",
+    "level": 10,
+    "prereqs": [
+      "memory-store"
+    ],
+    "short": "A short description of a tool result that the model sees in place of the full data, with field names, counts and samples.",
+    "body": "<p>When an agent keeps full results in a [[memory-store|memory store]], it shows the model a <b>structural summary</b> instead. Structural means it describes the shape of the data, such as its field names, how many items a list has, and a few sample values.</p>\n<p>The aim is to show enough for the model to decide, and no more. In an [[agent|agent]] loop each summary is resent in every later round, so its size is paid again and again. So summaries have a [[budget|budget]], such as 4,000 characters.</p>\n<ul><li>A list shows a header such as <code>40 items, fields: ['path', 'size']</code>, then as many rows as fit. If some rows are left out, the header says so, as in \"(showing 3 of 40)\", so the model knows to read more instead of running the search again.</li><li>Long text keeps its start and end, and reports its full length.</li></ul>\n<p>A summary that cuts too much causes wrong answers with no error message. If a file shows as its first 80 characters, the model sees one line and may guess the rest. In review, look at a real summary of a large result and ask whether you could do the task from it.</p>",
+    "example": {
+      "title": "A summary of a small file list",
+      "code": "result = {'files': [{'path': 'app.py', 'size': 120},\n                    {'path': 'test_app.py', 'size': 80}]}\nprint(describe(result))\n# files:\n# 2 items, fields: ['path', 'size']\n#     row[0]: path: \"app.py\", size: 120\n#     row[1]: path: \"test_app.py\", size: 80",
+      "notes": [
+        "A tool result, a dictionary that holds one list of rows.",
+        "The second row of the list.",
+        "Builds and prints the summary the model would see.",
+        "The field name, on its own line because its value takes several lines.",
+        "How many rows there are and which fields they have.",
+        "The first sample row.",
+        "The second row. Both rows fit, so the header does not say \"showing\"."
+      ]
+    }
+  },
+  "scratch": {
+    "id": "scratch",
+    "title": "Scratch notes",
+    "level": 10,
+    "prereqs": [
+      "agent"
+    ],
+    "short": "The model's own working notes. It sends them in each reply, and the app shows them in the next prompt, so conclusions survive.",
+    "body": "<p>The model forgets everything between calls. Results stay visible as summaries, but what the model concluded from them does not. <b>Scratch notes</b> are a place for that. Each reply has a field, often named <code>scratch</code> or <code>notes</code>, where the model writes key facts, values it extracted, or counts. The app puts those notes into the next [[prompt|prompt]].</p>\n<p>The prompt should say what the notes are for. They hold short facts and intermediate results, not whole files. A value written in the notes counts as known, and the model should not fetch it again.</p>\n<p>Two details decide whether notes help. First, a model that forgets to repeat its notes should not wipe them, so code keeps the old notes when a reply's notes are empty. Second, every prompt that needs the model's conclusions should include the notes, including the last-chance prompt that writes a [[fallback|fallback answer]]. If that prompt leaves them out, the answer can say \"I could not find out\" about a fact the notes already hold.</p>",
+    "example": {
+      "title": "Carrying notes from round to round",
+      "code": "notes = ''\nfor step in range(max_steps):\n    plan = ask_model(task, history, notes=notes)\n    notes = str(plan.get('scratch') or '') or notes\n    ...\n\nanswer = fallback_answer(task, history, notes=notes)",
+      "notes": [
+        "No notes before the first round.",
+        "The agent loop.",
+        "The prompt includes the current notes.",
+        "Takes the reply's new notes. If they are empty, the or keeps the old ones.",
+        "The rest of the loop.",
+        "",
+        "The fallback gets the notes too."
+      ]
+    }
+  },
+  "fallback": {
+    "id": "fallback",
+    "title": "Fallback answer (synthesis)",
+    "level": 10,
+    "prereqs": [
+      "agent"
+    ],
+    "short": "One last model call that writes an answer from whatever was gathered, used when the loop stops without a finished answer.",
+    "body": "<p>Sometimes an [[agent|agent]] loop ends without the model saying \"done\". It may use all its rounds. It may send a reply with nothing to run. Or a planning call may fail. The user still needs an answer, so the agent makes one more model call, the <b>fallback</b>, also called synthesis.</p>\n<p>The fallback builds a fresh, simple [[prompt|prompt]] that asks for plain text. It holds these parts:</p>\n<ul><li>The user's question.</li><li>Everything gathered, one line per result. Errors appear as errors, so the model can say what is missing.</li><li>The model's [[scratch|scratch notes]].</li><li>A request for the best answer it can give, which says the work stopped early and asks it to name what is missing instead of guessing.</li></ul>\n<p>A planning error should not throw away the work either. If the run gathered results, the fallback can answer from them. If it gathered nothing, the error itself, such as a bad API key, is the most useful thing to show. Record a [[stop-reason|stop reason]] with the answer, so a caller can tell a fallback answer from a finished one.</p>",
+    "example": {
+      "title": "Building the fallback prompt",
+      "code": "lines = []\nfor step in history:\n    for r in step['results']:\n        if r.get('error'):\n            lines.append(f\"- {r['tool']}: ERROR {r['error']}\")\n        else:\n            lines.append(f\"- {r['tool']}: {r.get('summary', '')}\")\nprompt = (f'Question: {task}\\n\\nGathered:\\n' + '\\n'.join(lines) +\n          f'\\n\\nYour notes:\\n{notes}\\n\\n' +\n          'The work stopped early. Answer as fully as you can, and say what is missing.')",
+      "notes": [
+        "One line per gathered result.",
+        "Goes through every round the run completed.",
+        "And through every result in it.",
+        "A call that failed.",
+        "It is listed with its error, so the model can say what is missing.",
+        "Any other result.",
+        "Shows its summary.",
+        "The question, then the gathered results.",
+        "The model's notes.",
+        "The request, which admits the work is unfinished."
+      ]
+    }
+  },
+  "stop-reason": {
+    "id": "stop-reason",
+    "title": "Stop reason",
+    "level": 10,
+    "prereqs": [
+      "agent"
+    ],
+    "short": "A short label that records why a model reply or an agent run ended, such as done, max_steps or error.",
+    "body": "<p>A run can end in several ways, and the answer text alone does not say which. A finished answer and a [[fallback|fallback]] answer forced by a round limit can look alike. A <b>stop reason</b> is a short label, written at the moment of stopping, that says which.</p>\n<p>Providers already report one for each reply. Anthropic's <code>stop_reason</code> is <code>end_turn</code> for a normal finish, <code>max_tokens</code> when the [[output-limit|output limit]] cut it off, and <code>tool_use</code> when it asks for a tool. OpenAI's <code>finish_reason</code> has <code>stop</code>, <code>length</code> and <code>tool_calls</code>.</p>\n<p>An [[agent|agent]] adds its own label for the whole run, such as these:</p>\n<ul><li><code>done</code>, the model finished and its answer was accepted.</li><li><code>max_steps</code>, the loop used all its rounds.</li><li><code>empty_plan</code>, a reply had nothing to run and no answer.</li><li><code>error</code>, a call raised an [[exception|exception]].</li></ul>\n<p>The label belongs in the run's log, in the last status message, and in the answer's metadata. When the agent runs as a tool of another agent, the parent can then treat a forced answer with more care.</p>",
+    "example": {
+      "title": "Recording the reason and passing it on",
+      "code": "stop = 'max_steps'\n...\nlog.info('run ended stop_reason=%s', stop)\nresult = {'answer': answer, 'meta': {'stop_reason': stop}}",
+      "notes": [
+        "The default, if the loop simply runs out of rounds.",
+        "Inside the loop, other lines set stop to 'done', 'empty_plan' or 'error' before leaving.",
+        "The reason goes into the log.",
+        "And into the answer's metadata, where a caller can read it."
+      ]
+    }
+  },
+  "check-tool": {
+    "id": "check-tool",
+    "title": "Check tool",
+    "level": 10,
+    "prereqs": [
+      "tool-call"
+    ],
+    "short": "A tool that verifies the work, such as a compiler, a test runner or a linter. An agent can require it after the last change.",
+    "body": "<p>A model can believe it is finished when it is not. It writes a file with a missing bracket and reports success. A <b>check tool</b> is a [[tool-call|tool]] whose job is to test the work, such as a compiler, a test runner or a linter. Its result is evidence, not opinion.</p>\n<p>Telling the model to check is not enough. Models skip steps, and some even write a fake \"all tests passed\" and cite it. So an agent can enforce the rule in code. It tracks the last round that changed something and the last round in which the check passed. If no passing check came after the last change, the agent refuses the model's \"done\" and tells it to run the check.</p>\n<p>The details matter. A check in the same round as a change does not count, because the two may have run at the same time. A failing check cancels an earlier pass. Code can spot common failure signs, such as an error or a non-zero exit code, but only the model can read what a compiler's message means.</p>",
+    "example": {
+      "title": "Refusing done until a check has run",
+      "code": "def not_checked(check_tool, last_check, last_change):\n    if check_tool and last_change >= 0 and last_check <= last_change:\n        return f'Not finished: run {check_tool} after your last change and fix what it reports.'\n    return ''",
+      "notes": [
+        "Returns why the run may not finish yet, or empty text if it may. Both numbers are round numbers, and -1 means not yet.",
+        "A check tool is set, something changed, and no passing check came after that change.",
+        "The message the model reads in the next round.",
+        "Empty text counts as false in an if, so the caller lets the run finish."
+      ]
+    }
+  },
+  "prompt-cache": {
+    "id": "prompt-cache",
+    "title": "Prompt caching",
+    "level": 10,
+    "prereqs": [
+      "prompt"
+    ],
+    "short": "A provider reusing the unchanged start of a prompt from an earlier call, which makes repeated calls cheaper and faster.",
+    "body": "<p>Apps often send nearly the same [[prompt|prompt]] many times. An [[agent|agent]] resends its role, rules and tool list every round, and only the part after them grows. <b>Prompt caching</b> lets a [[provider|provider]] keep its work on a prompt's start for a few minutes. If the next request starts with exactly the same text, the provider reuses that work, bills it at a lower price and answers faster.</p>\n<p>It only works for a prefix. One changed character near the start breaks the match for everything after it. So a cache-friendly prompt puts the fixed parts first and the changing parts, such as results, the time or the user's question, last.</p>\n<p>Providers differ. OpenAI caches the start of long prompts on its own. Anthropic caches up to a marker, <code>cache_control</code>, placed on a block of the request. It bills a cache write at about 1.25 times the normal input price and a cache read at about a tenth, so caching pays off from the second call. In review, check that nothing that changes every call, such as a timestamp, sits inside the cached part.</p>",
+    "example": {
+      "title": "Marking a fixed start for Anthropic's cache",
+      "code": "messages = [{'role': 'user', 'content': [\n    {'type': 'text', 'text': fixed_part,\n     'cache_control': {'type': 'ephemeral'}},\n    {'type': 'text', 'text': changing_part},\n]}]\nusage = response.json()['usage']\nprint(usage['cache_read_input_tokens'])",
+      "notes": [
+        "One user message made of two text blocks.",
+        "The fixed start, such as the role, rules and tools.",
+        "The marker. Anthropic caches everything up to the end of this block.",
+        "The part that changes every call, not marked.",
+        "Closes the block list and the message.",
+        "After the call, the usage numbers show what happened.",
+        "Tokens read from the cache at the lower price. 0 on the first call."
+      ]
+    }
+  },
+  "sse": {
+    "id": "sse",
+    "title": "Server-sent events (SSE)",
+    "level": 10,
+    "prereqs": [
+      "api"
+    ],
+    "short": "A web standard for a server to push a stream of small messages to a client, used for progress updates and for streaming model replies.",
+    "body": "<p>Some work takes a while, and a blank screen makes users think the app froze. <b>Server-sent events</b>, or SSE, is a web standard for sending news while the work goes on. The client makes one HTTP request, and the server keeps the response open and pushes small messages down it whenever it likes. Messages only go one way, from server to client.</p>\n<p>Each message is a few lines of text, such as <code>event: progress</code> and <code>data: {\"step\": 2}</code>, ended by a blank line. Browsers read them with the <code>EventSource</code> object.</p>\n<p>Model [[provider|providers]] use SSE to stream replies. With streaming turned on, the reply arrives a few [[token|tokens]] at a time, so an app can show text as the model writes it. Agents also send status events for steps such as \"Planning step 2...\" or \"Running: search\".</p>\n<p>In review, check that two users' streams cannot cross, and that the stream always ends, even when the work fails.</p>",
+    "example": {
+      "title": "Sending a status event",
+      "code": "def send_event(stream, event, data):\n    stream.write(f'event: {event}\\n')\n    stream.write(f'data: {json.dumps(data)}\\n\\n')\n    stream.flush()\n\nsend_event(stream, 'progress', {'message': 'Planning step 2...'})",
+      "notes": [
+        "Writes one server-sent event to an open response.",
+        "The event's type, such as progress.",
+        "Its data as one line of JSON, then a blank line that ends the message.",
+        "Sends it now instead of waiting for more.",
+        "",
+        "The client sees the status message at once."
+      ]
+    }
+  },
+  "task-token": {
+    "id": "task-token",
+    "title": "Secret token",
+    "level": 10,
+    "prereqs": [
+      "tool-call"
+    ],
+    "short": "A secret string that grants control, such as an API key or a job's control token. It must never reach logs, URLs, answers or prompts.",
+    "body": "<p>Many systems hand out secret <b>tokens</b>, strings that grant power. An API key lets a program spend money on an account. A job's control token lets whoever holds it stop the job, restart it or send it data. A token works like a house key. Anyone with a copy can walk in. This meaning has nothing to do with the [[token|tokens]] a model reads.</p>\n<p>A secret can hide behind a harmless name such as <code>task_id</code>, and code may copy it into places it does not belong. Agents make this worse. When one agent runs as another agent's [[tool-call|tool]], its whole answer, metadata included, becomes a tool result. That result goes into the parent's prompt, so it reaches the model [[provider|provider]] and any tool the parent can call, such as a web request tool.</p>\n<p>The fix is to keep secrets out of anything a model or another tool can read. If nothing reads a field, delete it. A good test puts a fake secret, such as <code>tk_test_secret</code>, into the setup and checks that it appears nowhere in the output.</p>",
+    "example": {
+      "title": "A test that guards against a leak",
+      "code": "def test_secret_never_reaches_the_answer():\n    agent = make_agent(settings={'control_token': 'tk_test_secret'})\n    answer = agent.run('List the files.')\n    assert 'tk_test_secret' not in repr(answer)",
+      "notes": [
+        "A test that runs the agent with a fake secret in its settings.",
+        "The fake secret is easy to search for.",
+        "Runs the agent and gets its whole answer, metadata included.",
+        "Turns the whole answer into text and checks that the secret is nowhere in it."
+      ]
+    }
+  },
+  "provider": {
+    "id": "provider",
+    "title": "Model provider",
+    "level": 10,
+    "prereqs": [
+      "api"
+    ],
+    "short": "A company that runs models and sells access through its API, such as OpenAI, Anthropic or Google, each with its own request format.",
+    "body": "<p>A <b>model provider</b> runs [[llm|models]] on its own computers and sells access through an [[api|API]]. OpenAI makes the GPT models, Anthropic makes Claude and Google makes Gemini. Some services, such as OpenRouter, are middlemen. One account reaches models from many companies through one API, often shaped like OpenAI's. Cloud platforms such as Amazon Bedrock also host models from several companies.</p>\n<p>Providers agree on the idea and differ in the details. Requests are shaped differently. [[tool-call|Tool calls]] come back in different shapes. Limits and [[stop-reason|stop reasons]] have different names. Features such as [[prompt-cache|prompt caching]] work differently.</p>\n<p>Most apps put a thin layer between their own code and the providers. Each provider gets an adapter that turns the app's request into that provider's shape and turns the reply back. The rest of the app calls one function. In review, check that a change for one provider stays inside its adapter, and that every other provider still gets the same request as before.</p>",
+    "example": {
+      "title": "One request, two providers' shapes",
+      "code": "anthropic_body = {'model': model, 'max_tokens': 1024, 'system': system,\n                  'messages': [{'role': 'user', 'content': question}]}\nopenai_body = {'model': model, 'max_tokens': 1024,\n               'messages': [{'role': 'system', 'content': system},\n                            {'role': 'user', 'content': question}]}",
+      "notes": [
+        "Anthropic takes the system text as its own field, and max_tokens is required.",
+        "The user's message.",
+        "OpenAI's Chat Completions API takes a similar body.",
+        "But the system text goes in as the first message.",
+        "Then the user's message."
+      ]
+    }
+  }
+}

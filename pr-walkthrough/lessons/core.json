@@ -1,0 +1,2141 @@
+{
+  "program": {
+    "id": "program",
+    "title": "Program",
+    "level": 1,
+    "prereqs": [],
+    "short": "A program is a set of written instructions that a computer carries out in order, one step after another.",
+    "body": "<p>A computer does nothing on its own. It follows instructions. A <b>program</b> is a set of those instructions, written as text by a person. The computer carries them out in order, one after another, very fast.</p>\n<p>Think of a recipe. It lists steps such as \"heat the pan\" and \"add two eggs\", and the cook does them in order. A program is a recipe for a computer. The difference is that a computer does exactly what the text says, even when the text has a mistake in it.</p>\n<p>A program's text lives in files (see [[source-file|source file]]), written in a [[python|programming language]]. A pull request changes some of those files. To review it, you read the changed instructions and ask what the computer will now do differently.</p>\n<p>The examples in this library are short Python programs, because Python reads close to plain English.</p>",
+    "example": {
+      "title": "Three instructions, run in order",
+      "code": "price = 20\ntotal = price * 3\nprint(f'Three tickets cost {total}.')",
+      "notes": [
+        "Store the number 20 under the name price.",
+        "Multiply it by 3 and store the result, 60, under the name total.",
+        "Show the text \"Three tickets cost 60.\" on the screen. The computer runs this line last because it comes last."
+      ]
+    }
+  },
+  "python": {
+    "id": "python",
+    "title": "Python",
+    "level": 1,
+    "prereqs": [
+      "program"
+    ],
+    "short": "Python is a popular programming language. A program called the interpreter reads Python text and carries it out.",
+    "body": "<p>People write [[program|programs]] in a <b>programming language</b>, a small language with strict rules that a computer can follow without guessing. Python is one of the most widely used. JavaScript, TypeScript, Java and Go are others. They differ in punctuation and in details, but most of the ideas in these lessons carry across.</p>\n<p>A computer's chip cannot read Python text directly. Another program, the Python <b>interpreter</b>, reads the text and carries out each instruction.</p>\n<p>Python's designers made it read almost like English. <code>if not items:</code> means \"if there are no items\". Python also uses the spaces at the start of a line to show which lines belong together (see [[indentation|indentation]]). Many other languages use curly braces for that.</p>\n<p>The examples in this library use Python. The ideas behind them, such as values, loops, functions and errors, exist in almost every language.</p>",
+    "example": {
+      "title": "Python reads almost like English",
+      "code": "items = cart.get('items') or []\nif not items:\n    message = 'Your cart is empty.'",
+      "notes": [
+        "Take the list of items out of the cart. If the cart has none, use an empty list.",
+        "Ask a yes/no question. Python reads it almost like English, \"if there are no items\".",
+        "Only in that case, set the message. The 4 spaces at the start mark this line as part of the if."
+      ]
+    }
+  },
+  "source-file": {
+    "id": "source-file",
+    "title": "Source file and module",
+    "level": 1,
+    "prereqs": [
+      "python"
+    ],
+    "short": "A source file is a text file of program code, such as a .py file. In Python, each such file is also a module that other files can use.",
+    "body": "<p>A [[program|program's]] text is saved in files, like any document. Python files end in <code>.py</code>, JavaScript files in <code>.js</code>. A file that holds program text is called a <b>source file</b>, because it is the source the program is made from.</p>\n<p>Large programs are split across many files, each with one job. A small web shop might keep its pricing rules in <code>pricing.py</code>, its database code in <code>storage.py</code> and its web pages in <code>views.py</code>.</p>\n<p>In Python, every <code>.py</code> file is also a <b>module</b>, a file whose names other files can borrow. A module's name is its file name without <code>.py</code>. <code>views.py</code> can borrow the [[function|function]] <code>total_price</code> from <code>pricing.py</code> with an [[module-import|import]] line.</p>\n<p>Splitting code this way keeps each file small enough to read, and a change usually touches only a few files. When you read a pull request's [[diff|diff]], the first thing it shows is which files changed.</p>",
+    "example": {
+      "title": "One module borrowing from two others",
+      "code": "# shop/views.py\nfrom .pricing import total_price\nfrom .storage import load_cart, save_order",
+      "notes": [
+        "A comment naming the file. The lines below sit at the top of views.py.",
+        "Borrow the function total_price from pricing.py in the same folder.",
+        "Borrow two functions from storage.py."
+      ]
+    }
+  },
+  "statement": {
+    "id": "statement",
+    "title": "Line and statement",
+    "level": 1,
+    "prereqs": [
+      "python"
+    ],
+    "short": "A statement is one complete instruction. Python usually puts one statement on each line and runs them from top to bottom.",
+    "body": "<p>A <b>statement</b> is one complete instruction, like one step in a recipe. In [[python|Python]] each statement normally sits on its own line. The interpreter runs the first line, then the second, then the third, from top to bottom. Some statements make it jump instead. A [[for-loop|loop]] repeats lines, and an [[if|if]] skips them.</p>\n<p>Some statements store a value, like <code>count = 0</code>. Some do something, like <code>print('Saved.')</code>. Some make a decision, like <code>if count &gt; 10:</code>.</p>\n<p>A long statement can spread over several lines when it sits inside brackets. Python treats the statement as unfinished until the brackets close.</p>\n<p>Order matters. Moving a line up or down can change what a program does even when no word in it changes. If one line deletes a file and a later line reads it, the program fails. Swapping the two lines fixes it. In a [[diff|diff]], watch for lines that moved.</p>",
+    "example": {
+      "title": "Four statements, run top to bottom",
+      "code": "order_id = 1042\nprint('Saving order...')\nitems = []\ntotal = 0",
+      "notes": [
+        "Statement 1. Store the order number.",
+        "Statement 2. Show a status message on the screen.",
+        "Statement 3. Start an empty list that will collect the order's items.",
+        "Statement 4. Start the running total at 0. Python runs these four lines in this order, top to bottom."
+      ]
+    }
+  },
+  "comment": {
+    "id": "comment",
+    "title": "Comment and docstring",
+    "level": 1,
+    "prereqs": [
+      "statement"
+    ],
+    "short": "A comment is a note for human readers, after a # sign. A docstring is a description in triple quotes. Python runs neither.",
+    "body": "<p>Computers run code, and people read it. A <b>comment</b> is a note for the people. In Python a comment starts with <code>#</code> and runs to the end of the line. The interpreter skips it.</p>\n<p>A <b>docstring</b> is a longer description in triple quotes (<code>\"\"\"...\"\"\"</code>), placed as the first [[statement|statement]] inside a [[function|function]], a [[class|class]] or a file. It says what that piece of code is for. Editors can show docstrings as help text, but they do not change what the program does.</p>\n<p>Good comments explain why, because the code already shows what. \"Retry 3 times because the payment service drops about 1 request in 200\" helps the next reader. \"Add 1 to count\" does not.</p>\n<p>The computer never checks a comment against the code. A comment can promise a time limit that no line enforces. When a review finds a comment and code that disagree, one of them is wrong.</p>",
+    "example": {
+      "title": "Comments, a docstring and the code they describe",
+      "code": "# Give up on the payment service after this many seconds.\n# Most replies arrive in under 2 seconds.\nPAYMENT_TIMEOUT_S = 10\n\ndef order_key(user_id, n):\n    \"\"\"Build the storage key for a user's nth order.\"\"\"\n    return f'user-{user_id}.order-{n}'",
+      "notes": [
+        "A comment. Python skips it. It tells the reader what the number below means.",
+        "The comment continues on a second line, which also starts with #.",
+        "Real code. Store 10 under the name PAYMENT_TIMEOUT_S.",
+        "",
+        "Start a function named order_key (the def lesson explains this line).",
+        "A docstring. It describes the function in one sentence and does nothing when the program runs.",
+        "The real work. Build a key such as user-7.order-2 and hand it back."
+      ]
+    }
+  },
+  "indentation": {
+    "id": "indentation",
+    "title": "Indentation",
+    "level": 1,
+    "prereqs": [
+      "statement"
+    ],
+    "short": "Indentation is the spaces at the start of a line. Python uses them to group lines into blocks, 4 spaces per level.",
+    "body": "<p><b>Indentation</b> means the spaces at the start of a line. In most writing it only makes text look tidy. In Python it changes the meaning. Lines indented under another line form a <b>block</b> that belongs to that line.</p>\n<p>A line that ends with a colon, such as <code>if total &gt; 100:</code> or <code>for item in cart:</code>, opens a block. Every following line that is indented further belongs to it. The block ends at the first line that moves back to the left. The standard is 4 spaces per level.</p>\n<p>Because the spaces carry meaning, moving one line left or right can change what a program does. A line inside an [[if|if]] block runs only when the condition holds. Moved 4 spaces to the left, it runs every time. In a [[diff|diff]], a line whose only change is its indentation can still be a real change.</p>\n<p>Many other languages mark blocks with curly braces instead, and their indentation is only for readers.</p>",
+    "example": {
+      "title": "Blocks inside blocks",
+      "code": "for order in orders:\n    for item in order['items']:\n        name = item['name']\n        lines.append(f'- {name}')\nreport = '\\n'.join(lines)",
+      "notes": [
+        "Start a loop over every order. The colon at the end opens a block.",
+        "Indented 4 spaces, so it is inside the first loop. It starts a second loop over that order's items.",
+        "Indented 8 spaces, so it runs once for every item. It reads the item's name.",
+        "Also 8 spaces. Add one line of text, such as \"- lamp\", to the list.",
+        "Back at the left edge. This line is outside both loops, so it runs once, after they finish. It joins all the lines into one text."
+      ]
+    }
+  },
+  "error-message": {
+    "id": "error-message",
+    "title": "Error message and traceback",
+    "level": 1,
+    "prereqs": [
+      "program"
+    ],
+    "short": "When a program crashes, Python prints a traceback, the chain of calls it was in. The last line names the error and what went wrong.",
+    "body": "<p>When Python reaches a line it cannot carry out, it stops and reports an <b>error</b>. The report is called a <b>traceback</b>. It lists the chain of places the [[program|program]] was in, from the outermost down to the exact line that failed. Read the last line first. It gives the error's type and a short message.</p>\n<p><code>AttributeError: 'str' object has no attribute 'get'</code> says the code asked a piece of text for an action that text does not have. <code>KeyError: 'price'</code> says the code looked up an entry named <code>price</code> that did not exist.</p>\n<p>Python calls these errors [[exception|exceptions]]. A program can catch an exception and carry on instead of crashing (see [[try-except|try and except]]). Each kind has a fixed name, so programmers can search for it and write [[test|tests]] that expect it.</p>\n<p>A bug report often starts with a traceback. A good fix explains why that line failed, not only how to stop the message.</p>",
+    "example": {
+      "title": "A crash and its traceback",
+      "code": "items = ['lamp, 2']\nfor item in items:\n    name = item.get('name')\n# Traceback (most recent call last):\n#   File \"orders.py\", line 3, in <module>\n# AttributeError: 'str' object has no attribute 'get'",
+      "notes": [
+        "A list with one item written as plain text, where the code expects a dictionary with named parts.",
+        "Go through each item in the list.",
+        "Ask the item for its \"name\" entry. Text has no .get action, so Python stops here with an error.",
+        "The traceback Python prints starts with this header line.",
+        "It names the file, the line number and where the code was running. &lt;module&gt; means the top level of the file.",
+        "The last line names the error type, AttributeError, and says what went wrong. Read this line first."
+      ]
+    }
+  },
+  "value": {
+    "id": "value",
+    "title": "Value",
+    "level": 2,
+    "prereqs": [
+      "program"
+    ],
+    "short": "A value is one piece of data a program works with, such as the number 80, the text 'hello' or True.",
+    "body": "<p>Programs work with data. A single piece of data is a <b>value</b>. The number <code>80</code> is a value. The text <code>'hello'</code> is a value. <code>True</code> is a value. Values are what a [[program|program]] stores, compares, sends and shows.</p>\n<p>Every value has a <b>type</b>, which says what kind of thing it is and what you can do with it. You can add two [[number|numbers]]. You can turn [[string|text]] into capitals. You cannot add a number to text, and Python stops with an [[error-message|error]] if you try. The simple types are numbers, strings (text), [[boolean|True and False]] and [[none|None]]. Larger values hold other values, such as [[list|lists]] and [[dict|dictionaries]].</p>\n<p>A value typed straight into the code, like <code>30</code> in <code>timeout = 30</code>, is called a <b>literal</b>. Most values in a running program are not typed in. They arrive from somewhere else, such as a user's form, a file or another program's reply.</p>\n<p>Many bugs are about values of the wrong type. A form sends the text <code>\"5\"</code> where the code expects the number <code>5</code>, or the text <code>\"false\"</code> where it expects the yes/no value <code>False</code>.</p>",
+    "example": {
+      "title": "Five values of different types",
+      "code": "80\n'hello'\nTrue\nNone\n['lamp', 'desk']",
+      "notes": [
+        "A number.",
+        "A string, which is text. The quotes mark where it starts and ends.",
+        "A boolean, one of the two yes/no values.",
+        "None, Python's value for \"nothing here\".",
+        "A list, one value that holds two other values in order."
+      ]
+    }
+  },
+  "variable": {
+    "id": "variable",
+    "title": "Variable",
+    "level": 2,
+    "prereqs": [
+      "value"
+    ],
+    "short": "A variable is a name that points at a value. You create or change it with a single =, as in limit = 80.",
+    "body": "<p>A <b>variable</b> is a name that points at a [[value|value]]. Think of a sticky label on a jar. The label is the name, and the jar's contents are the value. You attach the label with a single equals sign, as in <code>limit = 80</code>.</p>\n<p>That line is an <b>assignment</b>. It does not claim that limit equals 80, as it would in maths. It means \"make the name <code>limit</code> point at 80\". Later lines can write <code>limit</code> instead of 80, and Python looks up the value each time.</p>\n<p>A variable can be pointed at a new value later. Python works out the right side of <code>=</code> first, then moves the name to the result, so <code>count = count + 1</code> adds one to the count.</p>\n<p>Names use letters, digits and underscores, with no spaces. Python programmers write them in lower case with underscores, such as <code>retry_count</code>. A good name says what the value means, so a reader can follow the code without comments. In review, a name that no longer matches what its value holds is worth a comment.</p>",
+    "example": {
+      "title": "Creating and re-pointing names",
+      "code": "notes = ''\ncity = 'Lisbon'\nnotes = 'Flight lands at 9.'\ncount = 0\ncount = count + 1\nfirst = last = -1",
+      "notes": [
+        "Create the variable notes and point it at empty text.",
+        "Create a second variable, city, holding one word.",
+        "Point notes at new text. The old empty text is forgotten.",
+        "Start a counter at 0.",
+        "Python works out count + 1 first, which is 1, then points count at it.",
+        "Two names at once. Both first and last point at -1, a common way to mean \"not yet\"."
+      ]
+    }
+  },
+  "string": {
+    "id": "string",
+    "title": "String (text)",
+    "level": 2,
+    "prereqs": [
+      "value"
+    ],
+    "short": "A string is a piece of text in quotes, like 'hello'. You can measure it, cut pieces out of it and clean it up.",
+    "body": "<p>A <b>string</b> is a [[value|value]] that holds text. You write it between single or double quotes, as in <code>'hello'</code> or <code>\"hello\"</code>. Python treats both the same. Text that spans several lines goes in triple quotes.</p>\n<p>Strings come with tools. <code>len(s)</code> gives the number of characters. <code>s.strip()</code> gives a copy with spaces and line breaks removed from both ends. <code>s.lower()</code> gives a lower-case copy. <code>s[:80]</code> gives the first 80 characters (see [[index-slice|slicing]]).</p>\n<p>A string never changes in place. Each of those tools makes a new string and leaves the old one as it was. That is why code writes <code>answer = answer.strip().lower()</code>, which points the [[variable|variable]] at the cleaned copy. Calling <code>answer.strip()</code> on its own line, without the <code>=</code>, throws the cleaned copy away. That is a common slip.</p>\n<p>Much of what programs handle is text, such as file contents, web pages, messages and user input.</p>",
+    "example": {
+      "title": "Measuring and cleaning text",
+      "code": "path = 'docs/intro.md'\nlen(path)\npath.upper()\npath[:4]\n' YES '.strip().lower()",
+      "notes": [
+        "Make a string holding a file path and name it path.",
+        "Count its characters. The result is 13.",
+        "Make an upper-case copy, 'DOCS/INTRO.MD'. path itself does not change.",
+        "Take the first 4 characters, 'docs'.",
+        "Remove the spaces at both ends, then lower-case it. The result is 'yes'."
+      ]
+    }
+  },
+  "number": {
+    "id": "number",
+    "title": "Number",
+    "level": 2,
+    "prereqs": [
+      "value"
+    ],
+    "short": "Python has whole numbers (int) and decimals (float). You can do arithmetic on them, including //, which divides and drops the remainder.",
+    "body": "<p>Python has two everyday kinds of number. An <b>int</b> (integer) is a whole number, such as <code>8</code>, <code>-1</code> or <code>4000</code>. A <b>float</b> is a number with a decimal point, such as <code>0.2</code> or <code>2.5</code>. You write numbers without quotes. <code>'80'</code> in quotes is text, not a number.</p>\n<p>You can do arithmetic with <code>+</code>, <code>-</code>, <code>*</code> and <code>/</code>. Ordinary division <code>/</code> always gives a float, so <code>10 / 4</code> is <code>2.5</code>. Integer division <code>//</code> drops the part after the point, so <code>10 // 4</code> is <code>2</code>. The [[operator|operators]] lesson lists the rest.</p>\n<p>Floats are stored in binary, so some decimals cannot be exact. <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. That is why code that handles money often counts whole cents as ints. In review, a float used for money or compared with <code>==</code> is worth a question.</p>",
+    "example": {
+      "title": "Splitting a budget",
+      "code": "budget = 1000\nparts = 3\nshare = budget // parts\nhead = (share * 2) // 3\ntail = share - head\nprice_cents = 1999",
+      "notes": [
+        "A budget of 1,000 characters to share out.",
+        "Three parts of a message want a share.",
+        "Integer division. Each part gets 333 characters. Plain / would give 333.33.",
+        "Keep two thirds of a long text from its start. (333 * 2) // 3 is 222.",
+        "The rest, 111 characters, comes from its end.",
+        "Money as a whole number of cents, so there is no rounding error."
+      ]
+    }
+  },
+  "boolean": {
+    "id": "boolean",
+    "title": "True and False",
+    "level": 2,
+    "prereqs": [
+      "value"
+    ],
+    "short": "A boolean is one of two values, True or False. Comparisons produce them, and decisions in code depend on them.",
+    "body": "<p>A <b>boolean</b> is a [[value|value]] that can only be <code>True</code> or <code>False</code>. In Python both start with a capital letter and have no quotes. With quotes, <code>'True'</code> would be text that happens to spell the word.</p>\n<p>Booleans answer yes/no questions. <code>5 &gt; 3</code> produces <code>True</code>. <code>len(items) &lt; 10</code> produces <code>True</code> or <code>False</code> depending on the numbers (see [[comparison|comparison]]). Decisions in code, such as [[if|if]], go one way when the answer is <code>True</code> and another way when it is <code>False</code>.</p>\n<p>Programmers often store a boolean in a [[variable|variable]] whose name reads like a yes/no question, such as <code>is_paid</code> or <code>has_errors</code>.</p>\n<p>[[json|JSON]], a common format for sending data, writes the same two values in lower case, <code>true</code> and <code>false</code>. When data arrives as <code>\"paid\": \"false\"</code>, with quotes, the value is a string, not a boolean. Code that treats it as a yes/no answer then goes wrong (see [[truthiness|truthiness]]).</p>",
+    "example": {
+      "title": "Yes/no values",
+      "code": "is_paid = False\nsend_receipt = True\ntoo_long = len('docs/intro.md') > 80\nfits = not too_long",
+      "notes": [
+        "A boolean variable. The order has not been paid.",
+        "Another one.",
+        "A comparison gives a boolean. 13 is not more than 80, so too_long is False.",
+        "not flips a boolean. fits becomes True."
+      ]
+    }
+  },
+  "none": {
+    "id": "none",
+    "title": "None",
+    "level": 2,
+    "prereqs": [
+      "value"
+    ],
+    "short": "None is Python's value for \"nothing\" or \"missing\". Functions return it to say there is no result.",
+    "body": "<p><code>None</code> is a special [[value|value]] that means \"nothing here\". It is not zero and it is not empty text. It stands for a missing value. Python has exactly one <code>None</code>, so code checks for it with <code>is None</code> or <code>is not None</code>.</p>\n<p>Programs use <code>None</code> to say \"no answer\" or \"not set\". A [[function|function]] that finds nothing can hand back <code>None</code>. A setting that nobody filled in can start as <code>None</code>.</p>\n<p>That habit has a trap. If a lookup returns <code>None</code> both for \"not found\" and for \"found, and the stored value is None\", the caller cannot tell the two apart. Code that needs the difference returns a separate marker for \"not found\", or raises an [[exception|exception]].</p>\n<p>A second trap is a missing value that turns into a silent blank. If the caller replaces <code>None</code> with empty text, the user sees a gap and nobody learns that data was missing. A visible marker such as <code>[missing: price]</code> is easier to debug. [[json|JSON]] writes the same idea as <code>null</code>.</p>",
+    "example": {
+      "title": "A lookup that finds nothing",
+      "code": "def find_price(prices, name):\n    if name in prices:\n        return prices[name]\n    return None\n\nprice = find_price({'lamp': 25}, 'desk')\nif price is None:\n    price_text = '[missing: desk]'",
+      "notes": [
+        "Define a function that looks up a price by product name.",
+        "Is the name in the dictionary?",
+        "If so, hand back its price.",
+        "Otherwise hand back None, meaning \"not found\".",
+        "",
+        "Ask for a product that is not there.",
+        "is None checks for exactly the None value. Here it is True.",
+        "Show a visible marker instead of leaving a blank."
+      ]
+    }
+  },
+  "f-string": {
+    "id": "f-string",
+    "title": "f-string",
+    "level": 2,
+    "prereqs": [
+      "string"
+    ],
+    "short": "An f-string is text with an f before the opening quote. Python replaces anything in {curly braces} inside it with its value.",
+    "body": "<p>Programs often build text from pieces. An <b>f-string</b> is a [[string|string]] with the letter <code>f</code> just before the opening quote. Inside it, anything in curly braces is worked out and dropped into the text. If <code>n</code> is <code>2</code>, then <code>f'page-{n}'</code> becomes <code>'page-2'</code>.</p>\n<p>The braces can hold more than a name. <code>f'Step {n + 1} of 5'</code> does the sum first. <code>f'{len(text)} chars'</code> counts characters. <code>{name!r}</code> shows the value the way Python would write it, with its quotes. That helps in log messages, because empty text shows as <code>''</code> instead of nothing.</p>\n<p>Without f-strings you would glue pieces with <code>+</code> and turn numbers into text by hand, as in <code>'page-' + str(n)</code>. f-strings are shorter and easier to read.</p>\n<p>A plain string with braces but no <code>f</code> in front is a common slip. <code>'page-{n}'</code> stays exactly that text, braces and all.</p>",
+    "example": {
+      "title": "Building keys and messages",
+      "code": "user_id = 7\nn = 2\nkey = f'user-{user_id}.order-{n}'\nstep = 0\nmessage = f'Step {step + 1} of 5'\nname = ''\nlog_line = f'name={name!r}'",
+      "notes": [
+        "A user's id number.",
+        "Their order number.",
+        "Build a storage key. The result is 'user-7.order-2'.",
+        "Counting in code often starts at 0.",
+        "The braces can hold a sum. The result is 'Step 1 of 5', the status line a person sees.",
+        "An empty name, as a bug might produce.",
+        "!r shows the quotes, so the result is name='' and the empty value is easy to spot."
+      ]
+    }
+  },
+  "operator": {
+    "id": "operator",
+    "title": "Operators",
+    "level": 2,
+    "prereqs": [
+      "number"
+    ],
+    "short": "Operators are symbols and words that combine values, like + and // for numbers, and/or/not for yes/no values, and in for membership.",
+    "body": "<p>An <b>operator</b> takes one or two [[value|values]] and produces a new one. The arithmetic operators work on [[number|numbers]]:</p>\n<ul><li><code>+</code> adds, <code>-</code> subtracts and <code>*</code> multiplies.</li><li><code>/</code> divides and gives a decimal. <code>//</code> divides and drops the remainder. <code>%</code> gives the remainder.</li><li><code>+</code> also joins two strings, so <code>'page-' + '2'</code> is <code>'page-2'</code>.</li></ul>\n<p>Three word operators work on [[boolean|yes/no values]]. <code>a and b</code> is true only if both are true. <code>a or b</code> is true if either is. <code>not a</code> flips the answer. <code>or</code> has a useful habit. It gives back the first value that counts as true, so <code>data.get('items') or []</code> means \"the items, or an empty list if there are none\" (see [[truthiness|truthiness]]).</p>\n<p>The <code>in</code> operator asks whether something is inside a collection or a piece of text. <code>'error' in line</code> is true if that word appears in <code>line</code>. <code>status not in ('done', 'failed')</code> is true if the status is neither of those two.</p>",
+    "example": {
+      "title": "Operators at work",
+      "code": "10 // 4\n10 % 4\n'page-' + '2'\ndata.get('items') or []\n'error' in 'error: disk full'\nnot True",
+      "notes": [
+        "Integer division. The result is 2.",
+        "The remainder of the same division, 2.",
+        "Joining two strings gives 'page-2'.",
+        "If data has items, use them. If it has none, use an empty list instead.",
+        "in looks for the word inside the text. The result is True.",
+        "not flips True to False."
+      ]
+    }
+  },
+  "comparison": {
+    "id": "comparison",
+    "title": "Comparison",
+    "level": 2,
+    "prereqs": [
+      "boolean"
+    ],
+    "short": "Comparisons ask how two values relate, using == != &lt; &lt;= &gt; &gt;= and is. Each one answers True or False.",
+    "body": "<p>A <b>comparison</b> asks a question about two values and answers with a [[boolean|boolean]]. The comparison operators are these:</p>\n<ul><li><code>==</code> equal, and <code>!=</code> not equal.</li><li><code>&lt;</code> less than, and <code>&lt;=</code> less than or equal.</li><li><code>&gt;</code> greater than, and <code>&gt;=</code> greater than or equal.</li><li><code>is</code> asks whether both sides are the very same object. Programmers use it mostly with None, True and False.</li></ul>\n<p>Note the double equals. A single <code>=</code> stores a value in a [[variable|variable]]. A double <code>==</code> asks whether two values are equal.</p>\n<p><code>==</code> and <code>is</code> ask different questions. Python treats <code>True</code> as the number 1 in arithmetic, so <code>1 == True</code> is <code>True</code>. But 1 and True are different objects, so <code>1 is True</code> is <code>False</code>. Code that must accept only a real <code>True</code> can test <code>value is True</code>.</p>\n<p>JavaScript has two equality operators. <code>==</code> converts types first, so <code>'1' == 1</code> is true there. <code>===</code> compares without converting, and most JavaScript code uses it.</p>",
+    "example": {
+      "title": "Asking questions about values",
+      "code": "len('docs/intro.md') <= 80\n'user-7' != 'user-8'\npaid = 1\npaid == True\npaid is True\nv = None\nv is None",
+      "notes": [
+        "13 characters is at most 80, so this is True.",
+        "Two different keys, so != gives True.",
+        "Suppose some data says paid is the number 1.",
+        "== says True, because Python counts True as 1.",
+        "is says False, because 1 is not the True object.",
+        "Set v to None.",
+        "is None is the standard way to check for None. The result is True."
+      ]
+    }
+  },
+  "truthiness": {
+    "id": "truthiness",
+    "title": "Truthiness",
+    "level": 2,
+    "prereqs": [
+      "boolean"
+    ],
+    "short": "Python treats empty text, 0, empty collections and None as false, and almost everything else as true, even the text 'false'.",
+    "body": "<p>An [[if|if]] statement needs a yes or a no. If you give it something that is not a [[boolean|boolean]], Python decides whether it counts as true or false. This is called <b>truthiness</b>. These count as false:</p>\n<ul><li><code>None</code> and <code>False</code></li><li>the number <code>0</code> (and <code>0.0</code>)</li><li>empty text, <code>''</code></li><li>empty collections, such as <code>[]</code> (an empty [[list|list]]) and <code>{}</code> (an empty [[dict|dictionary]])</li></ul>\n<p>Everything else counts as true. That includes any text with at least one character in it, even <code>'0'</code>, <code>' '</code> and <code>'false'</code>. Programmers use this as a shortcut. <code>if not items:</code> means \"if the list is empty or missing\".</p>\n<p>The shortcut goes wrong when text stands in for a yes/no value. If data arrives as <code>\"done\": \"false\"</code>, with quotes, then <code>if data['done']:</code> sees a 5-letter string, which is truthy, and treats \"not done\" as done. The fix is to turn the text into a real boolean by its meaning first.</p>\n<p>JavaScript has the same idea with one surprise. An empty array, <code>[]</code>, counts as true there, so JavaScript code checks <code>items.length === 0</code> instead.</p>",
+    "example": {
+      "title": "Why the text 'false' counts as true",
+      "code": "bool('')\nbool('false')\nbool([])\nbool(['lamp'])\ndone = 'false'\nif done:\n    print('treated as done')\ndone = done.strip().lower() == 'true'",
+      "notes": [
+        "bool() shows how Python judges a value. Empty text is False.",
+        "Any non-empty text is True, even the word false.",
+        "An empty list is False.",
+        "A list with one item is True.",
+        "Some data sent the text 'false' instead of the value False.",
+        "Python asks whether 'false' is truthy. It is.",
+        "So this line runs, which is the bug.",
+        "The fix. Compare the cleaned text with 'true'. The result is the real boolean False."
+      ]
+    }
+  },
+  "list": {
+    "id": "list",
+    "title": "List",
+    "level": 3,
+    "prereqs": [
+      "value"
+    ],
+    "short": "A list is an ordered collection of values in square brackets. Positions count from 0, and append adds an item at the end.",
+    "body": "<p>A <b>list</b> holds several [[value|values]] in order, inside square brackets, separated by commas. <code>['lamp', 'desk']</code> is a list of two strings. A list can hold any values, including other lists and [[dict|dictionaries]]. Order is kept, and the same item can appear twice. Other languages often call it an array.</p>\n<p>Each item has a position, called its <b>index</b>, and counting starts at 0. <code>items[0]</code> is the first item. <code>len(items)</code> gives how many items there are. <code>items.append(x)</code> adds <code>x</code> at the end and changes the list in place. The [[index-slice|indexing and slicing]] lesson covers positions in more detail.</p>\n<p>Python can also build a list from another in one line, which is called a <b>list comprehension</b>. <code>[o['id'] for o in orders]</code> makes a list of the order ids, one per order.</p>\n<p>In review, watch for code that reads <code>items[0]</code> without checking that the list has an item. An empty list makes that line fail with an <code>IndexError</code>.</p>",
+    "example": {
+      "title": "Working with a list of orders",
+      "code": "orders = [{'id': 1, 'total': 20}, {'id': 2, 'total': 35}]\nlen(orders)\norders[0]\nlines = []\nlines.append('order 1: paid')\nids = [o['id'] for o in orders]",
+      "notes": [
+        "A list of two orders. Each order is a small dictionary.",
+        "How many orders? 2.",
+        "The first order, {'id': 1, 'total': 20}. Positions start at 0.",
+        "An empty list, ready to collect lines of text.",
+        "Add one line at the end. lines now has 1 item.",
+        "Build a new list of ids, [1, 2], one per order."
+      ]
+    }
+  },
+  "dict": {
+    "id": "dict",
+    "title": "Dictionary",
+    "level": 3,
+    "prereqs": [
+      "value"
+    ],
+    "short": "A dictionary stores values under keys, in {}. You look values up by key. .get(key, default) avoids a crash when the key is missing.",
+    "body": "<p>A <b>dictionary</b> (dict) stores [[value|values]] under names called <b>keys</b>. You write it in curly braces, with a colon between each key and its value, as in <code>{'name': 'lamp', 'price': 25}</code>. Other languages call the same thing a map, a hash or an object.</p>\n<p>Think of a set of labelled drawers. To get something out, you name the drawer. <code>item['price']</code> gives <code>25</code>. <code>item['color'] = 'red'</code> puts a value in a drawer, and creates the drawer if it was not there.</p>\n<p>Square brackets with a key that does not exist stop the program with a <code>KeyError</code>. <code>item.get('size')</code> is the safe version. It gives [[none|None]] when the key is missing. <code>item.get('size', 'M')</code> gives the second value, here <code>'M'</code>, instead. Code that reads data from outside, such as a web request, uses <code>.get</code> because any key might be missing.</p>\n<p><code>.items()</code> goes through every key and value in turn.</p>",
+    "example": {
+      "title": "An order as a dictionary",
+      "code": "order = {'id': 7, 'paid': False, 'items': []}\norder['paid']\norder.get('note')\norder.get('note', '')\norder['note'] = 'Leave at the door.'\nfor k, v in order.items():\n    print(k, v)",
+      "notes": [
+        "A dictionary with three keys.",
+        "Look up the key paid. The result is False.",
+        "note is not there. .get returns None instead of crashing.",
+        "With a default, .get returns the empty text ''.",
+        "Add a new key, note.",
+        "Go through every key and value pair, in the order they were added.",
+        "Show each pair, such as paid False."
+      ]
+    }
+  },
+  "tuple": {
+    "id": "tuple",
+    "title": "Tuple",
+    "level": 3,
+    "prereqs": [
+      "list"
+    ],
+    "short": "A tuple is a fixed group of values in round brackets, like (x, y). Functions use tuples to hand back two things at once.",
+    "body": "<p>A <b>tuple</b> is like a [[list|list]] that cannot change. You write it with round brackets, <code>(order, problems)</code>, or often with commas alone, <code>order, problems</code>. Once it is made, you cannot add, remove or replace its items.</p>\n<p>Programmers use a tuple for a small, fixed group where each position has a meaning, such as a pair of map coordinates, <code>(38.7, -9.1)</code>.</p>\n<p>Its most common job is handing back two results from a [[function|function]]. A function can end with <code>return order, problems</code>. The caller unpacks the pair into two [[variable|variables]] in one line, <code>order, problems = check_order(data)</code>. The first name gets the first item and the second name gets the second.</p>\n<p>Tuples also hold fixed sets of options, as in <code>status in ('done', 'failed')</code>. One detail trips people up. A tuple with one item needs a comma, <code>('done',)</code>. Without it, the brackets are only grouping, and <code>('done')</code> is a plain string.</p>",
+    "example": {
+      "title": "Returning and unpacking a pair",
+      "code": "def check_order(data):\n    problems = ['items[0] has no price']\n    order = {'id': data.get('id'), 'items': []}\n    return order, problems\n\norder, problems = check_order({'id': 7})\nlen(problems)",
+      "notes": [
+        "A function that checks an order and reports what was wrong.",
+        "A list of what was wrong with the data.",
+        "The cleaned order.",
+        "Hand back both at once, as a tuple.",
+        "",
+        "Unpack the tuple. order gets the order and problems gets the list.",
+        "problems has 1 item."
+      ]
+    }
+  },
+  "set": {
+    "id": "set",
+    "title": "Set",
+    "level": 3,
+    "prereqs": [
+      "list"
+    ],
+    "short": "A set is a collection with no duplicates and no order. Checking whether something is in a set is very fast.",
+    "body": "<p>A <b>set</b> holds [[value|values]] with no repeats and no fixed order. You make an empty one with <code>set()</code>, or write values in curly braces, as in <code>{'red', 'blue'}</code>. Adding something that is already there does nothing.</p>\n<p>Think of a guest list at a door. Each name appears once, and the main question is whether a person is on it. A set answers that question fast, even when it is large (the [[hash-table|hash table]] lesson explains how). Asking the same question of a [[list|list]] means checking the items one by one.</p>\n<p>The common actions are <code>s.add(x)</code>, <code>s.discard(x)</code>, which removes <code>x</code> if present and does nothing otherwise, and the test <code>x in s</code>. <code>set(items)</code> turns a list into a set and drops its repeats.</p>\n<p>A typical use is tracking what has already been handled, such as the files a program has opened, so it can close exactly those at the end. Because a set has no order, code that needs a stable order sorts it first.</p>",
+    "example": {
+      "title": "Tracking which files are open",
+      "code": "opened = set()\nopened.add('a.txt')\nopened.add('a.txt')\nlen(opened)\n'a.txt' in opened\nopened.discard('z.txt')\nsorted(opened)",
+      "notes": [
+        "An empty set.",
+        "Record that a.txt is open.",
+        "Adding the same name again changes nothing.",
+        "So the set still has 1 item.",
+        "A fast membership check. The result is True.",
+        "Remove a name that is not there. discard does not complain.",
+        "A sorted list of the names, ['a.txt']."
+      ]
+    }
+  },
+  "index-slice": {
+    "id": "index-slice",
+    "title": "Indexing and slicing",
+    "level": 3,
+    "prereqs": [
+      "list"
+    ],
+    "short": "x[0] picks the first item and x[-1] the last. A slice like s[:80] takes a range, here the first 80 characters.",
+    "body": "<p>[[list|Lists]] and [[string|strings]] keep their items in order, so you can pick items by position with square brackets after the name. <code>x[0]</code> is the first item and <code>x[1]</code> the second. Negative numbers count from the end, so <code>x[-1]</code> is the last item.</p>\n<p>A <b>slice</b> takes a range instead of one item. <code>x[a:b]</code> starts at position <code>a</code> and stops just before <code>b</code>. Leave out <code>a</code> to start at the beginning, or leave out <code>b</code> to run to the end. So <code>s[:80]</code> is the first 80 characters, and <code>s[-40:]</code> is the last 40. A slice never crashes when the text is shorter. It returns what there is. Slicing makes a new string or list and leaves the original as it was.</p>\n<p>Code often slices to cut long text down to size. Keeping only the start can hide what matters. The last line of an error log usually names the error, so a cut that keeps both ends, <code>s[:head]</code> and <code>s[-tail:]</code>, often works better (see [[budget|budgets and truncation]]).</p>",
+    "example": {
+      "title": "Cutting the head and tail of a text",
+      "code": "value = 'ValueError: price must be a number'\nvalue[0]\nvalue[-1]\nvalue[:10]\nvalue[-6:]\nhead, tail = 10, 6\nf'{value[:head]} ... {value[-tail:]}'",
+      "notes": [
+        "A 34-character text, like the last line of an error log.",
+        "The first character, 'V'.",
+        "The last character, 'r'.",
+        "The first 10 characters, 'ValueError'.",
+        "The last 6 characters, 'number'.",
+        "Keep 10 characters from the start and 6 from the end.",
+        "The result is 'ValueError ... number', with the middle dropped."
+      ]
+    }
+  },
+  "json": {
+    "id": "json",
+    "title": "JSON",
+    "level": 3,
+    "prereqs": [
+      "dict"
+    ],
+    "short": "JSON is a text format for data. json.loads turns JSON text into Python data, and json.dumps turns Python data back into JSON text.",
+    "body": "<p>Programs often send data to each other as text. <b>JSON</b> (JavaScript Object Notation) is the most common text format for that. It looks almost the same as Python's [[dict|dictionaries]] and [[list|lists]], as in <code>{\"paid\": true, \"items\": [\"lamp\"]}</code>.</p>\n<p>The differences are small. JSON uses double quotes only. It writes <code>true</code>, <code>false</code> and <code>null</code> in lower case, where Python writes <code>True</code>, <code>False</code> and <code>None</code>. JSON calls a dictionary an <b>object</b> and a list an <b>array</b>.</p>\n<p>Python's <code>json</code> module converts both ways. <code>json.loads(text)</code> reads JSON text and returns Python values. <code>json.dumps(data)</code> writes Python values out as JSON text. If the text is not valid JSON, <code>json.loads</code> stops with an error (see [[parsing|parsing]]).</p>\n<p>Web APIs, configuration files and log tools all use JSON. Valid JSON can still hold the wrong shape, such as a string where the code expects an object, so careful code checks the shape after it parses.</p>",
+    "example": {
+      "title": "From text to data and back",
+      "code": "import json\ntext = '{\"paid\": false, \"items\": [{\"name\": \"lamp\", \"qty\": 2}]}'\norder = json.loads(text)\norder['paid']\norder['items'][0]['name']\njson.dumps({'ok': True, 'id': 7})",
+      "notes": [
+        "Load Python's json module.",
+        "Data received from another program. So far it is only text.",
+        "Parse it. order is now a real Python dictionary.",
+        "JSON's false became Python's False.",
+        "Reach into the list and the first item. The result is 'lamp'.",
+        "The reverse direction. The result is the text {\"ok\": true, \"id\": 7}."
+      ]
+    }
+  },
+  "if": {
+    "id": "if",
+    "title": "if, elif, else",
+    "level": 4,
+    "prereqs": [
+      "boolean"
+    ],
+    "short": "if runs a block of code only when a condition is true. elif and else add other paths for when it is not.",
+    "body": "<p>Programs make decisions. An <b>if statement</b> runs a block of lines only when a condition is true. You write <code>if</code>, the condition, a colon, and then the indented block. Python works out the condition. If it is true, or [[truthiness|truthy]], the block runs. If not, Python skips it.</p>\n<p><code>else:</code> adds a block for the other case. <code>elif</code>, short for \"else if\", adds more conditions, checked in order. Only the first block whose condition holds runs.</p>\n<p>A common use is a <b>guard</b>, a check near the top that handles a bad or finished case and leaves early with [[return|return]]. Guards keep the main path of a function unindented and easy to read.</p>\n<p>The order of an <code>elif</code> chain matters. Python counts <code>True</code> as a number, so a chain that asks \"is it a number?\" before \"is it a boolean?\" sends <code>True</code> down the number path. When you review a chain, ask whether an early branch catches cases meant for a later one.</p>",
+    "example": {
+      "title": "Choosing how to show one result",
+      "code": "r = {'name': 'search', 'preview': 'three matches'}\nif r.get('error'):\n    line = 'an error'\nelif 'preview' in r:\n    line = r['preview']\nelse:\n    line = r.get('summary', '')",
+      "notes": [
+        "One result. This one keeps its data under preview.",
+        "First question. Is there an error? No, so Python skips the next line.",
+        "Skipped.",
+        "Second question, asked only because the first was false. Is there a preview? Yes.",
+        "This block runs. line becomes 'three matches'.",
+        "else catches everything that matched nothing above.",
+        "Skipped, because the elif already matched."
+      ]
+    }
+  },
+  "for-loop": {
+    "id": "for-loop",
+    "title": "for loop",
+    "level": 4,
+    "prereqs": [
+      "list"
+    ],
+    "short": "A for loop runs the same block once for each item in a collection, such as each order in a list.",
+    "body": "<p>A <b>for loop</b> repeats a block of lines once per item in a collection. <code>for order in orders:</code> means \"take each order in turn, name it <code>order</code>, and run the indented block\". When the items run out, Python carries on with the first line after the block.</p>\n<p>Think of sorting a stack of letters. You pick one up, deal with it, put it down and take the next, until the stack is empty.</p>\n<p><code>range(n)</code> gives the numbers 0, 1, 2 and so on up to <code>n - 1</code>, so a loop over it runs <code>n</code> times. <code>for attempt in range(3):</code> allows at most 3 attempts.</p>\n<p><code>enumerate(items)</code> gives each item together with its position, which helps when a message must say which item was wrong, as in <code>items[2]</code>. Loops can sit inside loops. The inner loop runs in full for every round of the outer one, so two loops over 1,000 items each run the inner block a million times.</p>",
+    "example": {
+      "title": "A loop with a limit",
+      "code": "max_tries = 3\nfor attempt in range(max_tries):\n    print(f'Attempt {attempt + 1}')\nprint('Giving up.')",
+      "notes": [
+        "This code may try at most 3 times.",
+        "Repeat the block with attempt set to 0, then 1, then 2.",
+        "Runs three times. It shows Attempt 1, Attempt 2 and Attempt 3, one per round.",
+        "Not indented, so it runs once, after the loop ends."
+      ]
+    }
+  },
+  "while-loop": {
+    "id": "while-loop",
+    "title": "while loop",
+    "level": 4,
+    "prereqs": [
+      "boolean"
+    ],
+    "short": "A while loop repeats a block as long as a condition stays true, checking the condition before each round.",
+    "body": "<p>A <b>while loop</b> repeats its block as long as a condition is true. Python checks the condition, runs the block, checks again, and so on. When the condition turns false, Python moves on to the first line after the loop.</p>\n<p>Use <code>while</code> when you do not know in advance how many rounds you need. A [[for-loop|for loop]] fits \"once per item\". A while loop fits \"until this is done\", like stirring until the sauce thickens.</p>\n<p>The danger is a loop whose condition never becomes false. It runs forever and the program hangs. Every while loop needs something inside it that moves it toward the end. When you review one, find that line. If it sits inside an <code>if</code>, ask what happens on the rounds where the <code>if</code> is false.</p>\n<p>A common pattern keeps a [[set|set]] of unfinished jobs and loops <code>while pending:</code>. Each round removes the jobs that finished, so the set shrinks and the loop ends.</p>",
+    "example": {
+      "title": "Waiting until every job is done",
+      "code": "pending = {'job-1', 'job-2'}\nwhile pending:\n    job = sorted(pending)[0]\n    print(f'{job} finished')\n    pending.discard(job)\nprint('all done')",
+      "notes": [
+        "Two jobs are still running. A set holds them.",
+        "Repeat while the set is not empty. An empty set counts as false.",
+        "Pick one job to handle. Real code would wait for whichever job finishes first.",
+        "Report it.",
+        "Remove it. This line moves the loop toward its end.",
+        "Runs once, after pending is empty."
+      ]
+    }
+  },
+  "break-continue": {
+    "id": "break-continue",
+    "title": "break and continue",
+    "level": 4,
+    "prereqs": [
+      "for-loop"
+    ],
+    "short": "break leaves a loop at once. continue skips the rest of the current round and starts the next one.",
+    "body": "<p>Sometimes a [[for-loop|loop]] should stop early, or skip part of a round. Python has two statements for this:</p>\n<ul><li><code>break</code> leaves the loop at once. Python goes to the first line after the loop.</li><li><code>continue</code> skips the rest of the current round and starts the next round, with the next item.</li></ul>\n<p>Both usually sit inside an [[if|if]], so they happen only in a certain situation. <code>break</code> fits \"stop searching, I found it\" or \"stop, there is nothing left to do\". <code>continue</code> fits \"this item is bad, skip it and go on\".</p>\n<p>Skipping with <code>continue</code> keeps one malformed entry from throwing away the good ones. The code records the problem, then moves on to the next entry. When you review such a loop, check that the skipped item is reported somewhere, so it does not vanish without a trace.</p>",
+    "example": {
+      "title": "Skipping a malformed entry",
+      "code": "problems, good = [], []\nrows = ['lamp 25', {'name': 'desk', 'price': 120}]\nfor i, row in enumerate(rows):\n    if not isinstance(row, dict):\n        problems.append(f'rows[{i}] was not an object')\n        continue\n    good.append(row)",
+      "notes": [
+        "Two empty lists, one for problems and one for good entries.",
+        "The input. The first row was written as plain text by mistake.",
+        "Go through the rows with their positions, 0 and 1.",
+        "isinstance(row, dict) asks whether the row is a dictionary. The text is not.",
+        "Record the problem in words a person can act on.",
+        "Skip the rest of this round. The append below does not run for the bad row.",
+        "Runs only for the good row. good ends up with one entry."
+      ]
+    }
+  },
+  "return": {
+    "id": "return",
+    "title": "return",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "return hands a value back to the code that called the function, and ends the function on that line.",
+    "body": "<p>A [[function|function]] often works something out for the code that called it. <code>return</code> hands that result back. When Python reaches a <code>return</code> line, the function stops at once, and the lines after it do not run.</p>\n<p>The value after <code>return</code> becomes the value of the call. If <code>area(3, 4)</code> ends with <code>return width * height</code>, the call itself stands for <code>12</code>, and the caller can store it in a [[variable|variable]]. A function with no <code>return</code>, or a bare <code>return</code>, hands back [[none|None]].</p>\n<p>Because <code>return</code> ends the function, programmers use it for early exits. A function can return a short answer for a simple case at the top and do the full work below. It can also return two values at once as a [[tuple|tuple]], as in <code>return order, problems</code>.</p>\n<p>The position of a <code>return</code> can decide a bug. Cleanup lines placed after a <code>return</code> never run on that path. Cleanup placed before it can delete data that the returned result still needs.</p>",
+    "example": {
+      "title": "Two ways out of a function",
+      "code": "def shorten(text, limit):\n    if len(text) <= limit:\n        return text\n    keep = limit - 3\n    return text[:keep] + '...'\n\nshort = shorten('A very long product name', 10)",
+      "notes": [
+        "Define a function that shortens text to a limit.",
+        "Is the text already short enough?",
+        "If so, hand it back unchanged. The function ends here.",
+        "Otherwise leave room for three dots.",
+        "Hand back the kept part plus the dots.",
+        "",
+        "Call the function. short gets 'A very ...', what the second return handed back."
+      ]
+    }
+  },
+  "function": {
+    "id": "function",
+    "title": "Function",
+    "level": 5,
+    "prereqs": [
+      "statement"
+    ],
+    "short": "A function is a named set of steps you can run whenever you need it. It takes inputs and usually hands back a result.",
+    "body": "<p>A <b>function</b> is a named group of [[statement|statements]] that you can run again and again. You write the steps once and give them a name. After that, writing the name with brackets, as in <code>total_price(cart)</code>, runs all the steps.</p>\n<p>Think of a recipe card titled \"Pancakes\". It lists the steps, takes ingredients as its inputs and produces pancakes as its output. You can follow it any number of times, with different ingredients each time.</p>\n<p>A function's inputs are called [[parameter|parameters]], and it usually hands back a result with [[return|return]]. Python comes with many functions, such as <code>len(x)</code>, which counts the items in <code>x</code>. Programmers write their own with [[def|def]].</p>\n<p>Splitting work into functions gives each piece one job, a name that says what it does, and a way to [[test|test]] it on its own. Most pull requests change the inside of one or two functions, so a walkthrough usually explains a change function by function.</p>",
+    "example": {
+      "title": "One recipe, used three times",
+      "code": "def order_key(user_id, n):\n    return f'user-{user_id}.order-{n}'\n\nfirst = order_key(7, 1)\nsecond = order_key(7, 2)\nother = order_key(9, 1)",
+      "notes": [
+        "Define a function named order_key with two inputs.",
+        "Its one step. Build the key text and hand it back.",
+        "",
+        "Run it. first is 'user-7.order-1'.",
+        "Run it again with other inputs. second is 'user-7.order-2'.",
+        "And again. other is 'user-9.order-1'. One definition serves all three calls."
+      ]
+    }
+  },
+  "def": {
+    "id": "def",
+    "title": "def",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "def is the keyword that creates a function. It gives the name, the inputs in brackets, and an indented block of steps.",
+    "body": "<p><code>def</code>, short for \"define\", creates a [[function|function]]. The line always has the same shape, as in <code>def shorten(text, limit):</code>. After <code>def</code> come the function's name, its inputs in round brackets separated by commas, and a colon.</p>\n<p>The [[indentation|indented]] lines below form the function's <b>body</b>, the steps it runs. The body often starts with a docstring (see [[comment|comment and docstring]]) and often ends with [[return|return]].</p>\n<p>Writing <code>def</code> does not run anything. It only stores the steps under the name. The steps run later, each time some code [[call|calls]] the function.</p>\n<p>Real <code>def</code> lines often carry extra notes. <code>def shorten(text: str, limit: int = 80) -&gt; str:</code> says what kind of value each input should be and that the function returns text (see [[type-hint|type hints]]). <code>limit: int = 80</code> gives that input a default (see [[keyword-argument|default values]]).</p>",
+    "example": {
+      "title": "A whole function, from def to return",
+      "code": "def keep_ends(text: str, limit: int) -> str:\n    \"\"\"Keep the start and end of text when it is longer than limit.\"\"\"\n    if len(text) <= limit:\n        return text\n    head = (limit * 2) // 3\n    tail = limit - head\n    return f'{text[:head]} ... {text[-tail:]} ({len(text)} chars)'",
+      "notes": [
+        "def starts a new function named keep_ends with two inputs, text and limit.",
+        "The docstring says what the function does.",
+        "If the text is short enough...",
+        "...hand back the whole text, and stop.",
+        "Otherwise keep two thirds of the limit from the start...",
+        "...and the remaining third from the end.",
+        "Hand back the start, \" ... \", the end, and the full length."
+      ]
+    }
+  },
+  "parameter": {
+    "id": "parameter",
+    "title": "Parameter and argument",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "Parameters are the input names listed in a def. Arguments are the actual values you pass in when you call the function.",
+    "body": "<p>A [[function|function]] usually needs inputs. The names listed in brackets in the <code>def</code> line are its <b>parameters</b>. Inside the function they work like [[variable|variables]]. The values you hand over when you run the function are the <b>arguments</b>.</p>\n<p>In <code>def order_key(user_id, n):</code> the parameters are <code>user_id</code> and <code>n</code>. In the call <code>order_key(7, 2)</code> the arguments are <code>7</code> and <code>2</code>. Python matches them by position, first argument to first parameter. Each call gets fresh parameters, so two calls with different arguments do not interfere.</p>\n<p>A recipe that says \"add the sugar\" has a slot named sugar. Each time you cook, a real amount of sugar goes into that slot.</p>\n<p>In a review, a removed parameter is worth a look. Every caller that still passes it will now fail. An added parameter needs a value from every caller, or a default (see [[keyword-argument|default values]]).</p>",
+    "example": {
+      "title": "Two parameters, two arguments",
+      "code": "def error_entry(step, message):\n    return {'key': f'step-{step}', 'error': message}\n\nentry = error_entry(4, 'Disk full.')\nentry['key']",
+      "notes": [
+        "error_entry has two parameters, step and message.",
+        "Inside, the parameters work like variables. The function builds a dictionary from them.",
+        "",
+        "The call passes two arguments. 4 goes into step and the text goes into message.",
+        "The key is 'step-4'."
+      ]
+    }
+  },
+  "keyword-argument": {
+    "id": "keyword-argument",
+    "title": "Keyword argument and default value",
+    "level": 5,
+    "prereqs": [
+      "parameter"
+    ],
+    "short": "A keyword argument names its parameter in the call, as in limit=40. A default value is used when the caller leaves that parameter out.",
+    "body": "<p>Normally Python matches [[parameter|arguments to parameters]] by position. You can instead name the parameter in the call, as in <code>shorten(text, limit=40)</code>. That is a <b>keyword argument</b>. It makes a call easier to read, and the order of named arguments does not matter.</p>\n<p>A parameter can have a <b>default value</b>, written in the <code>def</code> line with <code>=</code>. In <code>def shorten(text, limit=80):</code>, a caller that does not mention <code>limit</code> gets 80. Defaults keep old callers working when a function gains a new input. A pull request can add a parameter with a default, and every existing call stays correct without a change.</p>\n<p>A lone <code>*</code> in the parameter list makes callers pass every parameter after it by name. With <code>def send(*, to, subject, body):</code>, a caller has to write <code>to=...</code>, so it cannot swap the subject and the body by mistake.</p>\n<p>Watch for one trap. A default such as <code>items=[]</code> is made once, when Python reads the <code>def</code>, and every call shares that one list. Use <code>items=None</code> and create the list inside.</p>",
+    "example": {
+      "title": "Named arguments and a default",
+      "code": "def summarize(*, title, rows, notes=''):\n    if notes:\n        print('notes:', notes)\n\nsummarize(title='Q3', rows=[])\nsummarize(title='Q3', rows=[], notes='Two rows missing.')\nsummarize('Q3', [])",
+      "notes": [
+        "The * means every parameter after it must be named in the call. notes has the default ''.",
+        "Use the notes only when there are some.",
+        "Show them.",
+        "",
+        "No notes given, so notes is ''.",
+        "This call passes notes by name.",
+        "Passing by position is refused. Python stops with a TypeError because of the *."
+      ]
+    }
+  },
+  "call": {
+    "id": "call",
+    "title": "Calling a function",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "Writing a function's name followed by brackets, like len(text), runs the function. The call then stands for the value it returns.",
+    "body": "<p>Defining a [[function|function]] stores its steps. <b>Calling</b> it runs them. You call a function by writing its name followed by round brackets with the [[parameter|arguments]] inside, as in <code>order_key(7, 2)</code>. A function with no inputs still needs the brackets, as in <code>new_cart()</code>. Without them, <code>new_cart</code> names the function and runs nothing.</p>\n<p>When Python reaches a call, it jumps into the function, runs its body with the arguments in place, and comes back with the [[return|returned]] value. The call then stands for that value, so <code>key = order_key(7, 2)</code> stores <code>'user-7.order-2'</code>.</p>\n<p>Calls can be nested, and Python works from the inside out. In <code>len(name.strip())</code> it runs <code>strip</code> first, then passes the result to <code>len</code>.</p>\n<p>Calls chain across files. One function calls a second, which calls a third. A [[error-message|traceback]] lists exactly such a chain of calls, outermost first. To follow a change in a pull request, it helps to find who calls the changed function.</p>",
+    "example": {
+      "title": "A chain of calls",
+      "code": "cart = load_cart(user_id)\ntotal = total_price(cart)\norder, problems = check_order(cart)\ncount = len(problems)",
+      "notes": [
+        "Call load_cart to fetch the cart. Its returned value is stored in cart.",
+        "Call total_price on the cart. This line waits until the function returns.",
+        "Call check_order. It returns two values.",
+        "len is a call too. It returns how many problems there were."
+      ]
+    }
+  },
+  "scope": {
+    "id": "scope",
+    "title": "Scope",
+    "level": 5,
+    "prereqs": [
+      "variable"
+    ],
+    "short": "Scope is where a name is visible. A name made inside a function exists only there. A top-level name is visible in the whole file.",
+    "body": "<p>A [[variable|variable]] name is not visible everywhere. Its <b>scope</b> is the part of the program where Python can find it.</p>\n<ul><li>A name created inside a [[function|function]], including its parameters, is <b>local</b>. It exists only while that call runs, and code outside the function cannot see it. Each call gets its own fresh copy.</li><li>A name created at the top level of a file, outside every function, is <b>module-level</b>, also called global. Every function in that [[source-file|module]] can read it.</li></ul>\n<p>A local name is like a whiteboard in a meeting room, wiped after each meeting. A module-level name is like a notice on the building's front door that everyone sees.</p>\n<p>Settings usually live at module level, such as <code>TIMEOUT_S = 30</code>. Work in progress should stay local, so that two calls running at once cannot mix up each other's data (see [[shared-state|shared state]]). Tests can swap a module-level name for a short time, for example to make a timeout shorter (see [[fixture|monkeypatch]]).</p>",
+    "example": {
+      "title": "Local and module-level names",
+      "code": "TIMEOUT_S = 30\n\ndef handle_request():\n    notes = ''\n    print(TIMEOUT_S)\n\nhandle_request()\nprint(notes)",
+      "notes": [
+        "Module-level. Every function in the file can read it.",
+        "",
+        "A function.",
+        "A local name. It exists only inside this call of handle_request.",
+        "Reading the module-level name works and shows 30.",
+        "",
+        "Run the function.",
+        "Outside the function, notes is not visible. Python stops with a NameError."
+      ]
+    }
+  },
+  "inner-function": {
+    "id": "inner-function",
+    "title": "Inner function and closure",
+    "level": 5,
+    "prereqs": [
+      "scope"
+    ],
+    "short": "An inner function is a def inside another def. It can use the outer function's variables, which makes it a closure.",
+    "body": "<p>You can write a <code>def</code> inside another [[function|function]]. The result is an <b>inner function</b>. It exists only inside the outer function, so nothing else in the file can call it by name.</p>\n<p>An inner function can read the outer function's local [[variable|variables]] (see [[scope|scope]]). It keeps that access even when it is handed to other code to run later. A function that keeps access to the variables around it is called a <b>closure</b>. This saves passing the same values in again and again.</p>\n<p>A common use is a small job handed to other code, such as a [[thread-pool|pool of worker threads]]. The inner function takes only the item to work on, and finds everything else, such as a shared results table, in the outer function.</p>\n<p>In review, notice which outer variables an inner function changes. If several threads run it at once, they all change the same variables.</p>",
+    "example": {
+      "title": "An inner function that writes to the outer one's data",
+      "code": "def download_all(urls, pool):\n    started = {}\n\n    def timed(url):\n        started[url] = time.monotonic()\n        return fetch(url)\n\n    for url in urls:\n        pool.submit(timed, url)",
+      "notes": [
+        "The outer function. pool is a pool of worker threads.",
+        "A local dictionary that will hold each download's start time.",
+        "",
+        "An inner function. It exists only inside download_all.",
+        "It writes into started, the outer function's variable. That makes it a closure.",
+        "Then it downloads the page and hands back the result.",
+        "",
+        "Back in the outer function, go through the addresses.",
+        "Hand timed to a worker thread. The thread runs it later, and it still finds started."
+      ]
+    }
+  },
+  "lambda": {
+    "id": "lambda",
+    "title": "lambda",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "lambda makes a small function in one line without giving it a name, such as lambda x: x * 2.",
+    "body": "<p><code>lambda</code> makes a short [[function|function]] inside one expression, with no <code>def</code> line and no name. <code>lambda x: x * 2</code> is a function that takes <code>x</code> and returns <code>x * 2</code>. The part before the colon lists the [[parameter|parameters]], and the part after it is the value it returns. A lambda can hold only that one expression.</p>\n<p>Programmers use a lambda when some code needs a function as an input and the function is too small to deserve a name. <code>sorted(orders, key=lambda o: o['total'])</code> sorts orders by their total.</p>\n<p>Tests use lambdas as small stand-ins (see [[fake|fakes]]). <code>send_email = lambda *args: None</code> replaces a real email call with one that does nothing. A fake clock can be <code>lambda: clock.now</code>, a function that returns whatever time the test has set.</p>",
+    "example": {
+      "title": "A pretend clock built with a lambda",
+      "code": "clock = SimpleNamespace(now=0.0)\nfake_time = SimpleNamespace(monotonic=lambda: clock.now)\nfake_time.monotonic()\nclock.now = 11.0\nfake_time.monotonic()",
+      "notes": [
+        "An object that holds one number, now, the time on a pretend clock. It starts at 0.",
+        "A stand-in for Python's time module. Its monotonic is a lambda with no inputs that returns clock.now.",
+        "Returns 0.0.",
+        "The test moves the clock forward by hand, 11 seconds.",
+        "Returns 11.0. The lambda reads clock.now each time it is called, so it sees the new value."
+      ]
+    }
+  },
+  "module-import": {
+    "id": "module-import",
+    "title": "import",
+    "level": 5,
+    "prereqs": [
+      "source-file"
+    ],
+    "short": "import brings names from another module into this file. from .pricing import total reads total from pricing.py in the same folder.",
+    "body": "<p>A [[source-file|module]] can use code from other modules. An <b>import</b> line brings it in. There are two common shapes:</p>\n<ul><li><code>import json</code> loads the whole <code>json</code> module. You then write <code>json.loads(...)</code>, with the module's name in front.</li><li><code>from typing import Any</code> takes the listed names out of a module, so you can write <code>Any</code> directly.</li></ul>\n<p><code>as</code> renames on the way in. <code>from .pricing import total as order_total</code> brings in <code>total</code> under the name <code>order_total</code>, which keeps it apart from other things called total.</p>\n<p>The dot in <code>.pricing</code> makes it a <b>relative import</b>. It means \"the module named pricing in the same folder as this file\". Without the dot, Python looks in its installed libraries and the project's top-level folders.</p>\n<p>Python runs a module's top-level code the first time anything imports it, then reuses it. Imports sit at the top of a file, so a reader sees at once what the file depends on. A new import in a [[diff|diff]] tells you the file now depends on something new.</p>",
+    "example": {
+      "title": "The imports at the top of a file",
+      "code": "import json\nfrom typing import Any\n\nimport requests\nfrom .pricing import total as order_total\nfrom .storage import load_cart, save_order",
+      "notes": [
+        "Load Python's json module. The code later calls json.loads(...).",
+        "Take one name from Python's typing module. It is used in type hints.",
+        "",
+        "Load an installed library, requests, which makes web requests.",
+        "Relative import. Take total from pricing.py next to this file, and call it order_total here.",
+        "Take two functions from storage.py."
+      ]
+    }
+  },
+  "package": {
+    "id": "package",
+    "title": "Package",
+    "level": 5,
+    "prereqs": [
+      "module-import"
+    ],
+    "short": "A package is a folder of Python modules with an __init__.py file. Dotted names like shop.payments point into it.",
+    "body": "<p>A [[module-import|module]] is one file. A <b>package</b> is a folder that groups related modules. Python treats a folder as a package when it contains a file named <code>__init__.py</code>. Python runs that file the first time any code imports the package, and it often just lists what the package offers.</p>\n<p>Packages can hold other packages, which gives dotted names. <code>shop.payments.cards</code> means the module <code>cards</code> inside the folder <code>payments</code> inside the folder <code>shop</code>. Each dot is one folder level.</p>\n<p>Test folders can be packages too. When two test folders each hold a file with the same name, such as <code>test_client.py</code>, [[pytest|pytest]] can load both only when each folder is its own package. A pull request that adds an empty <code>__init__.py</code> to a test folder may be fixing that clash.</p>\n<p>The word package has a second meaning. A library you install, for example with <code>pip install requests</code>, is also called a package.</p>",
+    "example": {
+      "title": "A package's __init__ file",
+      "code": "# shop/payments/__init__.py\nfrom .cards import charge_card\nfrom .refunds import refund\n\n__all__ = ['charge_card', 'refund']",
+      "notes": [
+        "A comment with the file's path. This is the package's __init__.py.",
+        "Bring charge_card in from cards.py in the same folder.",
+        "Bring refund in from refunds.py.",
+        "",
+        "List the names the package offers to other code."
+      ]
+    }
+  },
+  "type-hint": {
+    "id": "type-hint",
+    "title": "Type hints",
+    "level": 5,
+    "prereqs": [
+      "parameter"
+    ],
+    "short": "Type hints such as -&gt; str or dict[str, int] note what kind of value a name should hold. Python does not enforce them.",
+    "body": "<p>A <b>type hint</b> is a note in the code about what kind of [[value|value]] a name should hold. In a <code>def</code> line, <code>limit: int</code> says the [[parameter|parameter]] <code>limit</code> should be a whole number, and <code>-&gt; str</code> after the brackets says the function returns text. A variable can carry a hint too, as in <code>names: list[str] = []</code>.</p>\n<p>Common hints are these. Older code writes <code>List</code> and <code>Dict</code>, imported from the <code>typing</code> module.</p>\n<ul><li><code>list[str]</code> is a [[list|list]] of strings.</li><li><code>dict[str, Any]</code> is a [[dict|dictionary]] with text keys and values of any type.</li><li><code>Optional[str]</code>, also written <code>str | None</code>, is a string or [[none|None]].</li><li><code>tuple[dict, list[str]]</code> is a pair of a dictionary and a list.</li></ul>\n<p>Python does not check hints while the program runs. If you pass text where the hint says <code>int</code>, nothing stops you at that line. Hints are for human readers, editors and checking tools such as mypy, which can warn before the program runs. Data from outside, such as a web request, may not match its hint, so code still checks it with <code>isinstance</code>.</p>",
+    "example": {
+      "title": "Hints on two functions",
+      "code": "def check_order(data: Any) -> tuple[dict, list[str]]:\n    problems: list[str] = []\n    ...\n\ndef find_price(prices: dict[str, int], name: str) -> Optional[int]:\n    ...",
+      "notes": [
+        "data can be anything. The function promises to return a pair, a dictionary and a list of strings.",
+        "problems is a list of strings, starting empty.",
+        "The rest of the body is left out here.",
+        "",
+        "Returns a whole number or None. None means the name was not found.",
+        "Body left out."
+      ]
+    }
+  },
+  "constant": {
+    "id": "constant",
+    "title": "Constant",
+    "level": 5,
+    "prereqs": [
+      "variable"
+    ],
+    "short": "A constant is a module-level name in CAPITALS whose value should never change, such as MAX_RETRIES = 3.",
+    "body": "<p>Some values are settings that should never change while the program runs. Programmers give them a name in capital letters, at the top of the file, and call them <b>constants</b>. <code>MAX_RETRIES = 3</code> is one.</p>\n<p>Python does not lock a constant. Code could still assign a new value. The capitals are a convention that means \"do not change this\". A leading underscore, as in <code>_MAX_RETRIES</code>, adds \"for use inside this file only\" (see [[private-name|leading underscore]]).</p>\n<p>A named constant beats a bare number, often called a magic number. The name and a comment above it say what the number means and why it has that value, and changing the value means changing one line. When a pull request replaces a repeated <code>80</code> with <code>MAX_LINE_CHARS</code>, it makes later changes safer.</p>\n<p>A constant that nothing uses is a warning sign. A comment can promise a limit that no code enforces, so in review, search for the lines that read the constant.</p>",
+    "example": {
+      "title": "Limits, named once",
+      "code": "MAX_WORKERS = 8\nTIMEOUT_S = 30\nMAX_LINE_CHARS = 80\n\nif len(line) <= MAX_LINE_CHARS:\n    shown = line",
+      "notes": [
+        "At most 8 jobs run at once.",
+        "Each job gets 30 seconds.",
+        "The longest line shown in full.",
+        "",
+        "Code reads the constant by name, so the reader sees what 80 means.",
+        "A line this short is shown whole."
+      ]
+    }
+  },
+  "decorator": {
+    "id": "decorator",
+    "title": "Decorator",
+    "level": 5,
+    "prereqs": [
+      "function"
+    ],
+    "short": "A decorator is a line starting with @ above a def or class. It wraps or marks what follows, as in @dataclass or @pytest.fixture.",
+    "body": "<p>A <b>decorator</b> is a line that starts with <code>@</code>, placed right above a <code>def</code> or a <code>class</code>. It takes the [[function|function]] or class defined below, changes or labels it, and puts the result back under the same name. You write it once, and it applies to the whole definition.</p>\n<p>Think of gift wrap. The present inside is the same, but the wrapping changes how it is handled.</p>\n<p>Common decorators:</p>\n<ul><li><code>@dataclass</code> above a class writes its setup code (see [[dataclass|dataclass]]).</li><li><code>@staticmethod</code> above a method marks one that does not need its object (see [[staticmethod|staticmethod]]).</li><li><code>@pytest.fixture</code> turns a function into a [[fixture|fixture]], a helper that tests ask for by name.</li><li><code>@pytest.mark.parametrize(...)</code> runs the [[test|test]] below once for each input in a list.</li><li><code>@app.route('/orders')</code> in web frameworks such as Flask connects a function to a web address.</li></ul>\n<p>A decorator can change behavior a lot while adding only one line to a [[diff|diff]], so it deserves a careful look in review.</p>",
+    "example": {
+      "title": "Turning a function into a fixture",
+      "code": "import pytest\n\n@pytest.fixture\ndef sample_cart():\n    return {'items': [{'name': 'lamp', 'price': 25}]}",
+      "notes": [
+        "Load pytest, the tool that runs the tests.",
+        "",
+        "The decorator line. It marks the function below as a pytest fixture.",
+        "The function it applies to. A test that has a parameter named sample_cart gets what this returns.",
+        "A small cart, built fresh for each test that asks for it."
+      ]
+    }
+  },
+  "object": {
+    "id": "object",
+    "title": "Object",
+    "level": 6,
+    "prereqs": [
+      "value"
+    ],
+    "short": "An object is a value that bundles data with the actions that work on it. In Python, every value is an object.",
+    "body": "<p>An <b>object</b> is a [[value|value]] that bundles data with actions. The data are its [[attribute|attributes]], named values reached with a dot, such as <code>cart.owner</code>. The actions are its [[method|methods]], functions reached the same way, such as <code>cart.add('lamp', 25)</code>.</p>\n<p>Think of a car. It has data, such as its colour and fuel level, and actions, such as start and brake. You can press the brake pedal without knowing how the brakes work inside.</p>\n<p>In Python every value is an object, even simple ones. The text <code>'hello'</code> is an object with methods such as <code>.upper()</code> and <code>.strip()</code>. A list is an object with <code>.append()</code>. That is why the dot shows up everywhere in Python code.</p>\n<p>A [[class|class]] defines each kind of object. Larger programs are built from objects that each own one part of the work, such as a database connection, a web request or a shopping cart.</p>",
+    "example": {
+      "title": "Using a cart object",
+      "code": "cart = Cart('ana')\ncart.owner\ncart.add('lamp', 25)\ncart.coupon = 'SPRING'\ntotal = cart.total()",
+      "notes": [
+        "Make a new Cart object for the user ana. It starts with an empty list of items.",
+        "Read one of its data values. The result is 'ana'.",
+        "Use one of its actions. add puts the item in this cart's list.",
+        "Set another data value on the object.",
+        "Ask the object to work out its total from everything it holds."
+      ]
+    }
+  },
+  "class": {
+    "id": "class",
+    "title": "Class",
+    "level": 6,
+    "prereqs": [
+      "object"
+    ],
+    "short": "A class is a blueprint for objects. It lists the data each object holds and the methods it has.",
+    "body": "<p>A <b>class</b> is a blueprint for [[object|objects]]. It describes what data each object of that kind holds and which [[method|methods]] it has. The keyword <code>class</code> starts it, followed by the name and a colon, and the indented block below holds the methods.</p>\n<p>A cookie cutter is the usual picture. The cutter is the class. Each cookie you stamp out is an object made from it, called an [[instance|instance]]. All the cookies have the same shape, but each can have its own icing.</p>\n<p>Class names use CapitalWords by convention, so <code>OrderStore</code> is a class while <code>order_store</code> is a variable or a module. Making an object from a class looks like calling a function, as in <code>Cart('ana')</code>.</p>\n<p>Tests often add small classes of their own, stand-ins that answer like a real part with canned data (see [[fake|fakes]]).</p>",
+    "example": {
+      "title": "A small class",
+      "code": "class Cart:\n    \"\"\"A shopping cart for one user.\"\"\"\n\n    def __init__(self, owner):\n        self.owner = owner\n        self.items = []\n\n    def add(self, name, price):\n        self.items.append((name, price))",
+      "notes": [
+        "Start a class named Cart.",
+        "Its docstring.",
+        "",
+        "The setup method. Python runs it once for every new Cart object.",
+        "Each object remembers whose cart it is.",
+        "And starts with its own empty list of items.",
+        "",
+        "A method every Cart object has.",
+        "It adds a (name, price) pair to this cart's list."
+      ]
+    }
+  },
+  "instance": {
+    "id": "instance",
+    "title": "Instance",
+    "level": 6,
+    "prereqs": [
+      "class"
+    ],
+    "short": "An instance is one object made from a class. Each instance has its own data, and all instances share the class's methods.",
+    "body": "<p>An <b>instance</b> is one [[object|object]] made from a [[class|class]]. <code>cart = Cart('ana')</code> makes a new instance of <code>Cart</code> and names it <code>cart</code>. Run that line twice and you get two separate instances. Changing one does not change the other.</p>\n<p>Every instance has its own data, but all instances of a class share the same methods. Two cookies from one cutter have the same shape and separate icing.</p>\n<p>How many instances exist, and who shares them, is a design decision with real effects. A web server often makes one instance of a service when it starts, and every request uses that one object, even when two requests run at the same time (see [[concurrency|concurrency]]).</p>\n<p>So data that belongs to one request cannot live on that shared object. Code makes a fresh instance for each request instead, and drops it when the request ends (see [[shared-state|shared state]]).</p>",
+    "example": {
+      "title": "One service, many request states",
+      "code": "service = OrderService()\nfirst = RequestState()\nsecond = RequestState()\nfirst.seen['abc123'] = 'step-0'\nlen(second.seen)\nfirst is second",
+      "notes": [
+        "One service instance, made once when the server starts.",
+        "A RequestState instance for one request.",
+        "Another, for a second request.",
+        "Record something in the first request's state.",
+        "The second instance is unaffected. Its seen dictionary is still empty, so this is 0.",
+        "Two separate objects, so this is False."
+      ]
+    }
+  },
+  "attribute": {
+    "id": "attribute",
+    "title": "Attribute",
+    "level": 6,
+    "prereqs": [
+      "object"
+    ],
+    "short": "An attribute is a named value stored on an object, reached with a dot, as in cart.owner or self.timeout.",
+    "body": "<p>An <b>attribute</b> is a named [[value|value]] that belongs to an [[object|object]]. You reach it with a dot, as in <code>cart.owner</code> or <code>self.timeout</code>. Read <code>cart.owner</code> as \"the owner of cart\".</p>\n<p>You set an attribute with <code>=</code>, the same way as a [[variable|variable]]. <code>cart.coupon = 'SPRING'</code> changes the coupon on that one cart. If the attribute did not exist yet, Python creates it.</p>\n<p>Attributes are how an object remembers things between [[method|method]] calls. A client object can read its settings into <code>self.timeout</code> and <code>self.retries</code> once, in its setup method, and use them on every request.</p>\n<p>Asking for an attribute that does not exist stops the program with an <code>AttributeError</code>. This often happens when a new attribute is set only in the setup method and some code, such as an old [[test|test]], builds the object another way. A default on the class fixes that (see [[class-attribute|class attribute]]).</p>",
+    "example": {
+      "title": "Setting and reading attributes",
+      "code": "self.retries = config.get('retries', 3)\nself.timeout = float(config.get('timeout') or 30)\nfor attempt in range(self.retries):\n    user = request.user",
+      "notes": [
+        "Store an attribute on the client object. It comes from the settings, or 3 if none is set.",
+        "Another attribute, the timeout in seconds.",
+        "Read the attribute back to know how many tries are allowed.",
+        "Read an attribute of the request object."
+      ]
+    }
+  },
+  "method": {
+    "id": "method",
+    "title": "Method",
+    "level": 6,
+    "prereqs": [
+      "function"
+    ],
+    "short": "A method is a function that belongs to a class. You call it on an object with a dot, as in cart.add(item).",
+    "body": "<p>A <b>method</b> is a [[function|function]] defined inside a [[class|class]]. Every object made from the class has it. You call it through an object with a dot, as in <code>cart.add('lamp', 25)</code> or <code>file.close()</code>.</p>\n<p>A method works on the object it was called on. <code>cart.add(...)</code> adds to that cart and to no other cart. Inside the method, the object is available as [[self|self]].</p>\n<p>Built-in values have methods too. <code>'abc'.upper()</code> is a method of strings, <code>items.append(x)</code> is a method of lists, and <code>data.get('id')</code> is a method of dictionaries.</p>\n<p>Splitting a class's work into methods keeps each one short. A pull request often moves a few lines out of a long method into a new one, because a second place in the code needs the same lines. That kind of move should not change what the code does, and a review can check that it does not.</p>",
+    "example": {
+      "title": "Two methods of one class",
+      "code": "class Cart:\n    def total(self):\n        return sum(price for _, price in self.items)\n\n    def receipt(self):\n        lines = [f'{name}: {price}' for name, price in self.items]\n        return '\\n'.join(lines) + f'\\nTotal: {self.total()}'",
+      "notes": [
+        "A class.",
+        "A method. It belongs to the class, so it is indented inside it.",
+        "Add up the prices of this cart's items.",
+        "",
+        "Another method.",
+        "One line of text per item.",
+        "Call the first method on the same object, through self."
+      ]
+    }
+  },
+  "self": {
+    "id": "self",
+    "title": "self",
+    "level": 6,
+    "prereqs": [
+      "method"
+    ],
+    "short": "self is the name a method uses for the object it was called on, so it can reach that object's data and other methods.",
+    "body": "<p>When you call a [[method|method]] as <code>cart.add('lamp', 25)</code>, Python passes the object, <code>cart</code>, in as an extra first argument. By convention the method names that first parameter <code>self</code>. So <code>def add(self, name, price):</code> receives three things, the object and two values.</p>\n<p>Inside the method, <code>self</code> is how the code reaches the object's own [[attribute|attributes]] and methods. <code>self.items</code> reads this cart's items. <code>self.total()</code> calls another method on the same object.</p>\n<p>Think of a form with \"this applicant\" printed on it. Each person who fills it in is \"this applicant\" on their own copy.</p>\n<p>Anything stored on <code>self</code> lives as long as the object. If one object serves many callers, every caller sees and changes the same <code>self</code> data. That is the [[shared-state|shared state]] problem, and it is worth checking whenever a change adds a new <code>self.something = ...</code> line.</p>",
+    "example": {
+      "title": "A method reading its own object",
+      "code": "def needs_check(self, last_check, last_change):\n    if self.check_command and last_check < last_change:\n        return f'Run {self.check_command} before finishing.'\n    return ''\n\njob.needs_check(2, 3)",
+      "notes": [
+        "A method. self is the object it is called on.",
+        "Read this object's setting through self. A check is needed when one is set and the last check came before the last change.",
+        "Build the message, again reading the setting through self.",
+        "Otherwise return empty text, meaning no check is needed.",
+        "",
+        "The call. Python passes job as self, 2 as last_check and 3 as last_change."
+      ]
+    }
+  },
+  "init": {
+    "id": "init",
+    "title": "__init__ (constructor)",
+    "level": 6,
+    "prereqs": [
+      "method"
+    ],
+    "short": "__init__ is the method Python runs automatically when it makes a new object. It gives the object its starting attributes.",
+    "body": "<p>When you make a new object, as in <code>Cart('ana')</code>, Python creates an empty object of that class and then runs its <code>__init__</code> method. <code>__init__</code>, said \"dunder init\" for the double underscores, is the <b>constructor</b>. Its job is to give the new object its starting [[attribute|attributes]].</p>\n<p>The arguments in the creating call go to <code>__init__</code>, after [[self|self]]. In <code>def __init__(self, owner):</code>, <code>owner</code> receives the value passed in.</p>\n<p>A child class's <code>__init__</code> usually starts with <code>super().__init__(...)</code>, which runs the parent's setup first (see [[override|super()]]).</p>\n<p>Some code builds objects without running <code>__init__</code>, for example tests that call <code>Cart.__new__(Cart)</code> to skip slow setup. Any attribute set only in <code>__init__</code> is then missing, and the first line that reads it fails.</p>",
+    "example": {
+      "title": "Setting up a new object",
+      "code": "class Cache:\n    def __init__(self, store, prefix):\n        self._store = store\n        self._prefix = f'{prefix}/'\n        self._keys = set()\n        self._closed = False\n        self._lock = threading.Lock()\n\ncache = Cache(store, 'req-1')",
+      "notes": [
+        "A small cache class.",
+        "The constructor. Python runs it once for each new Cache.",
+        "Keep the storage this object wraps.",
+        "Build the key prefix, followed by a slash.",
+        "Start an empty set of the keys this object writes.",
+        "The cache is open for writes.",
+        "A lock, so two threads cannot change the object at the same moment.",
+        "",
+        "Make a new Cache. Python creates the object and runs __init__ with these two arguments."
+      ]
+    }
+  },
+  "inheritance": {
+    "id": "inheritance",
+    "title": "Inheritance",
+    "level": 6,
+    "prereqs": [
+      "class"
+    ],
+    "short": "Inheritance lets a class build on another. class Child(Parent) gets all the parent's methods and adds or changes some.",
+    "body": "<p>A [[class|class]] can be based on another class. You write the parent in brackets, as in <code>class EmailNotifier(Notifier):</code>. This is <b>inheritance</b>. The new class, the child or subclass, gets every method and class attribute of the parent, the base class, without copying them. It then adds its own or [[override|replaces]] some.</p>\n<p>Think of a standard job description that each branch office extends with local duties. The shared duties are written once.</p>\n<p>A base class often holds the steps every child needs, such as logging and error handling, and leaves one method for each child to write. Each child fills in that one method its own way.</p>\n<p>Inheritance also builds families of errors. <code>class PaymentError(ValueError)</code> is a new kind of error that code already catching <code>ValueError</code> still catches (see [[custom-exception|custom exception class]]). In review, a change to a base class affects every child, so look for all of them.</p>",
+    "example": {
+      "title": "A child that inherits a method",
+      "code": "class Notifier:\n    def send(self, user, text):\n        self.log.append((user, text))\n        return self.deliver(user, text)\n\nclass EmailNotifier(Notifier):\n    def deliver(self, user, text):\n        return smtp_send(user.email, text)\n\nnotifier.send(user, 'Your order shipped.')",
+      "notes": [
+        "The parent class.",
+        "A method every notifier needs.",
+        "It records what was sent, so a later check can confirm it.",
+        "Then it hands the delivery to deliver, which each child writes.",
+        "",
+        "The child class. (Notifier) means it inherits everything above.",
+        "It writes its own deliver.",
+        "Send the text by email.",
+        "",
+        "An EmailNotifier can call send even though it never defines it. Python finds send on Notifier."
+      ]
+    }
+  },
+  "override": {
+    "id": "override",
+    "title": "Overriding and super()",
+    "level": 6,
+    "prereqs": [
+      "inheritance"
+    ],
+    "short": "Overriding means a child class defines a method with the same name as its parent's. super() calls the parent's version from inside it.",
+    "body": "<p>When a child class defines a [[method|method]] with the same name as one in its parent, the child's version wins for the child's objects. This is <b>overriding</b>. Python looks for a method on the object's own class first, and only then on the parent (see [[inheritance|inheritance]]).</p>\n<p>Often the child wants the parent's work plus something extra. <code>super()</code> gives access to the parent's version. <code>super().__init__(config)</code> inside a child's <code>__init__</code> runs the parent's setup first. The child then adds its own settings.</p>\n<p>A child can skip <code>super()</code> on purpose. A test class can override the one method that would send a real network request, record the call and return fixed text, while every other method still runs for real.</p>\n<p>A base class can also mark a method as abstract. Its version only raises <code>NotImplementedError</code>, and every child must override it. A review should check that an override keeps the parent's promises, such as what it returns and which errors it raises.</p>",
+    "example": {
+      "title": "Extending one method, replacing another",
+      "code": "class SlackNotifier(Notifier):\n    def __init__(self, config):\n        super().__init__(config)\n        self.channel = config.get('channel', 'general')\n\nclass RecordingClient(HttpClient):\n    def send(self, request):\n        self.sent.append(request)\n        return '{\"ok\": true}'",
+      "notes": [
+        "A child of Notifier.",
+        "It overrides __init__.",
+        "First run the parent's __init__, which loads the shared settings.",
+        "Then add a setting only this child needs.",
+        "",
+        "A test class, a child of a real HTTP client.",
+        "It overrides send, the method that would contact a real server.",
+        "It records the request.",
+        "It returns fixed text. It never calls super(), so no request leaves the test."
+      ]
+    }
+  },
+  "class-attribute": {
+    "id": "class-attribute",
+    "title": "Class attribute",
+    "level": 6,
+    "prereqs": [
+      "attribute"
+    ],
+    "short": "A class attribute is a value stored on the class itself and shared by all its instances, such as KIND = 'email'.",
+    "body": "<p>Code sets most [[attribute|attributes]] on one object, usually in <code>__init__</code> with <code>self.name = ...</code>. You write a <b>class attribute</b> directly in the class body, outside any method. It belongs to the class, and every instance shares it.</p>\n<p>When code reads <code>obj.name</code>, Python looks on the object first. If the object has no attribute of that name, it looks on the class. So a class attribute works as a default for every instance. One instance can still set its own value, which hides the class's value for that instance only.</p>\n<p>A child class can replace a parent's class attribute with its own value (see [[inheritance|inheritance]]). A class-level default also protects code that builds an object without running <code>__init__</code>, such as an old test.</p>\n<p>Class attributes suit fixed values, such as numbers and strings. A list or dictionary as a class attribute is one shared object. If any instance adds to it, every instance sees the change, which leads to the problems in [[shared-state|shared state]].</p>",
+    "example": {
+      "title": "A default on the class, a value on the instance",
+      "code": "class Notifier:\n    KIND = 'generic'\n    check_command: str = ''\n\n    def __init__(self, config):\n        self.check_command = config.get('check', '')\n\nbare = Notifier.__new__(Notifier)\nbare.check_command",
+      "notes": [
+        "A class.",
+        "A class attribute. Every notifier reports its kind as 'generic' unless told otherwise.",
+        "A default. An object that never ran __init__ still has this value.",
+        "",
+        "The normal setup method.",
+        "Set this instance's own value. It hides the class value for this object.",
+        "",
+        "Make an object without running __init__, as some tests do.",
+        "Python finds no value on the object, so it uses the class's ''. Without the class default, this line would raise AttributeError."
+      ]
+    }
+  },
+  "private-name": {
+    "id": "private-name",
+    "title": "Leading underscore",
+    "level": 6,
+    "prereqs": [
+      "attribute"
+    ],
+    "short": "A name starting with one underscore, like _render, means \"internal, not for use from outside\". It is a convention, not a lock.",
+    "body": "<p>Python has no way to truly hide a name. Instead, programmers follow a convention. A name that starts with one underscore, such as <code>_render</code>, <code>_MAX_WORKERS</code> or <code>self._lock</code>, means the name is internal to its file or class, and outside code should leave it alone.</p>\n<p>Python does not enforce it. Other code can still read <code>_MAX_WORKERS</code> or call <code>_render</code>. The underscore works like a \"staff only\" sign on a door, not a lock. It tells readers which names are the public entry points and which are details that may change without warning.</p>\n<p>This helps in review. A change to an underscore name affects only its own file, so the search for callers is short. A change to a public name may break code elsewhere, even in other projects.</p>\n<p>[[test|Tests]] are the usual exception. They reach into internals to check them directly. Names with two underscores on each side, like <code>__init__</code>, are a different thing. They are special names that Python itself calls.</p>",
+    "example": {
+      "title": "Internal helpers and a public entry point",
+      "code": "_MAX_WORKERS = 8\n\ndef _order_key(user_id, n):\n    return f'user-{user_id}.order-{n}'\n\ndef save_order(user_id, n, order):\n    return _store.put(_order_key(user_id, n), order)",
+      "notes": [
+        "Internal setting. Only this file should use it.",
+        "",
+        "Internal helper. The underscore says other files should not call it.",
+        "It builds a key such as user-7.order-2.",
+        "",
+        "Public. No underscore, because other files call it.",
+        "It uses the internal helper to do the work."
+      ]
+    }
+  },
+  "dataclass": {
+    "id": "dataclass",
+    "title": "dataclass",
+    "level": 6,
+    "prereqs": [
+      "class"
+    ],
+    "short": "@dataclass writes a class's __init__ for you from a list of typed fields. A frozen dataclass cannot be changed.",
+    "body": "<p>Many classes exist mainly to hold a few named values. Writing their <code>__init__</code> by hand is repetitive. The <code>@dataclass</code> [[decorator|decorator]] does it for you. You list the fields with [[type-hint|type hints]], and Python writes an <code>__init__</code> that accepts them, plus a readable printout and an equality check.</p>\n<p>A field can have a default. For a [[list|list]] or [[dict|dictionary]] default you write <code>field(default_factory=dict)</code>, which makes a fresh empty dictionary for every new object. A plain <code>= {}</code> would give every object the same dictionary, so Python refuses it.</p>\n<p><code>@dataclass(frozen=True)</code> makes objects that cannot be changed after creation. To get a version with one field different, you call <code>dataclasses.replace</code>, which builds a new object and leaves the original as it was. Frozen objects are safe to share, because nobody can change them under you (see [[shared-state|shared state]]).</p>",
+    "example": {
+      "title": "A dataclass and a frozen one",
+      "code": "import dataclasses\nfrom dataclasses import dataclass, field\n\n@dataclass\nclass RequestState:\n    seen: dict[str, str] = field(default_factory=dict)\n    errors: list[str] = field(default_factory=list)\n\n@dataclass(frozen=True)\nclass Settings:\n    timeout: float = 30.0\n\nstate = RequestState()\nfast = dataclasses.replace(Settings(), timeout=5.0)",
+      "notes": [
+        "Load the dataclasses module, for replace below.",
+        "Bring in the decorator and the field helper.",
+        "",
+        "The decorator. It writes __init__ for the class below.",
+        "A class that holds what one request remembers.",
+        "A field. Each new RequestState gets its own empty dictionary.",
+        "A second field, made the same way.",
+        "",
+        "A frozen dataclass. Its objects cannot change.",
+        "Settings for one request.",
+        "One field with a default.",
+        "",
+        "Make one. Python's generated __init__ fills both fields.",
+        "Build a new Settings with a shorter timeout. The original object stays as it was."
+      ]
+    }
+  },
+  "staticmethod": {
+    "id": "staticmethod",
+    "title": "staticmethod",
+    "level": 6,
+    "prereqs": [
+      "method"
+    ],
+    "short": "@staticmethod marks a method that does not use self. It belongs to the class for tidiness but needs no object data.",
+    "body": "<p>A normal [[method|method]] receives the object as [[self|self]]. Some functions belong with a class because they are part of its work, yet never touch the object's data. The <code>@staticmethod</code> [[decorator|decorator]] tells Python not to pass <code>self</code> to such a method. It then takes only its own parameters.</p>\n<p>You can still call it through an object, as in <code>self.error_entry(...)</code>, or through the class, as in <code>Job.error_entry(...)</code>. Either way it behaves like a plain function stored inside the class. The marker also tells a reader that the result depends only on the inputs, never on the object's state.</p>\n<p>A close cousin is <code>@classmethod</code>, which receives the class instead of the object. It is often used for extra ways to build an object, such as <code>Order.from_json(text)</code>.</p>",
+    "example": {
+      "title": "A method with no self",
+      "code": "class Job:\n    @staticmethod\n    def error_entry(step, message):\n        return {'key': f'step-{step}', 'error': message}\n\nentry = Job.error_entry(4, 'Disk full.')\nentry['key']",
+      "notes": [
+        "A class.",
+        "The decorator. It says error_entry does not receive self.",
+        "So the parameters are only step and message.",
+        "It builds and returns a dictionary from those two inputs.",
+        "",
+        "Call it through the class. No Job object is needed.",
+        "The key is 'step-4'."
+      ]
+    }
+  },
+  "shared-state": {
+    "id": "shared-state",
+    "title": "Shared state",
+    "level": 6,
+    "prereqs": [
+      "attribute"
+    ],
+    "short": "Shared state is data stored where several users can change it. If two requests share one object, one can overwrite the other's data.",
+    "body": "<p><b>State</b> is what a program remembers between steps. It becomes <b>shared state</b> when several users can read and change the same copy, for example an [[attribute|attribute]] on one object that many callers use.</p>\n<p>Picture two cooks tracking two different orders on one notepad. If one cook tears off the page to start a new order while the other is halfway through, the second cook's notes are gone.</p>\n<p>Servers hit this often. A server makes one service object at startup, and requests use it at the [[concurrency|same time]]. If the service starts each request with <code>self.seen = {}</code>, request B wipes request A's table while A is still using it.</p>\n<p>The fix is to move everything a request remembers into objects the request creates for itself, and pass them along as arguments. The shared object keeps only settings that never change. When [[thread|threads]] truly must share data, a [[lock|lock]] lets one in at a time (see [[race-condition|race condition]]). In review, any attribute that a request writes on a long-lived object deserves a question.</p>",
+    "example": {
+      "title": "Per-request state instead of state on the service",
+      "code": "class OrderService:\n    def handle(self, request):\n        state = RequestState()\n        cache = Cache(self.store, request.id)\n        try:\n            return self._process(request, state=state, cache=cache)\n        finally:\n            cache.close()",
+      "notes": [
+        "One instance serves every request.",
+        "handle is called once per request, possibly by two requests at the same time.",
+        "Make this request's own state. Nothing is stored on self.",
+        "Make this request's private view of the shared store. Its keys get the request id in front.",
+        "Start a try block, so the finally block below runs however the work ends.",
+        "Do the work. The state travels as an argument.",
+        "Runs at the end, even after an error.",
+        "Clear what this request stored and refuse any late writes."
+      ]
+    }
+  },
+  "exception": {
+    "id": "exception",
+    "title": "Exception",
+    "level": 7,
+    "prereqs": [
+      "error-message"
+    ],
+    "short": "A signal that something went wrong. It travels up through the functions that called the code until something catches it.",
+    "body": "<p>An <b>exception</b> is Python's way of saying \"I cannot go on.\" When a line of code hits a problem it cannot handle, Python stops running that line and creates an exception [[object|object]]. The object records what kind of problem it was and carries a message about it.</p>\n<p>Then the exception travels up. If the problem happened inside a [[function|function]], Python leaves that function and goes back to the line that [[call|called]] it. If nothing there handles the exception, Python leaves that function too, and so on up the chain. Picture a fire alarm that rings on one floor, then the floor above, until someone answers it. If nobody answers, the program stops and prints a [[error-message|traceback]].</p>\n<p>Programmers like this design because the code that notices a problem is often not the code that knows what to do about it. A low-level function only has to say \"this went wrong.\" A higher-level function decides whether to retry, report the problem, or give up. The code that answers the alarm uses [[try-except|try and except]]. Other languages call the same thing an error and catch it with <code>try</code> and <code>catch</code>.</p>",
+    "example": {
+      "title": "An exception travels up out of a function",
+      "code": "def first_name(rows):\n    return rows[0].get('name', '?')\n\nrows = ['lamp, 25']\nname = first_name(rows)\nprint(name)\n# AttributeError: 'str' object has no attribute 'get'",
+      "notes": [
+        "Defines a function that returns the name in the first row of a list.",
+        "Asks the first row for its 'name' entry. This works only if the row is a dictionary.",
+        "",
+        "A list holding one row written as plain text.",
+        "Calls the function. Inside it, .get fails on text, so Python raises AttributeError and leaves the function at once.",
+        "This line never runs. The exception is still travelling up, and nothing here catches it.",
+        "The last line of the traceback Python prints when nothing catches the exception."
+      ]
+    }
+  },
+  "try-except": {
+    "id": "try-except",
+    "title": "try and except",
+    "level": 7,
+    "prereqs": [
+      "exception"
+    ],
+    "short": "A way to catch an exception and handle it, so one failed step does not crash the whole program.",
+    "body": "<p><code>try</code> and <code>except</code> let a program answer the alarm that an [[exception|exception]] raises. You put the risky lines under <code>try:</code>. Under <code>except</code> you write what to do if one of them fails. If nothing fails, Python skips the <code>except</code> block. If something fails, Python jumps straight to the <code>except</code> block and runs it instead of crashing.</p>\n<p>You can say which exceptions to catch. <code>except ValueError:</code> catches only that kind. <code>except Exception as exc:</code> catches almost any error and puts it in the [[variable|variable]] <code>exc</code>, so the code can read its message. Python checks the <code>except</code> lines from top to bottom and uses the first one that matches.</p>\n<p>A good <code>except</code> block turns the failure into something useful, such as an error entry with the cause, so one broken step does not end the whole job. A bad one catches everything and hides it. In review, look at what an <code>except</code> block does with the error. If it neither logs it nor passes it on, the problem disappears without a trace.</p>",
+    "example": {
+      "title": "Turning one failed job into an error entry",
+      "code": "try:\n    data = fetch(url)\n    return {'url': url, 'size': len(data)}\nexcept Exception as exc:\n    err = f'{type(exc).__name__}: {exc}'\n    log.error('fetch failed url=%s error=%s', url, err)\n    return {'url': url, 'error': err}",
+      "notes": [
+        "Starts the protected block. Python watches every line under it for exceptions.",
+        "Downloads a page. A missing page or a network failure raises an exception here.",
+        "Python reaches this line only if the download worked.",
+        "Catches any exception from the block above and names it exc.",
+        "Builds text such as 'TimeoutError: no reply' from the exception's type name and message.",
+        "Writes the error to the log for developers.",
+        "Returns an error entry instead of crashing. The caller can report it and go on."
+      ]
+    }
+  },
+  "raise": {
+    "id": "raise",
+    "title": "raise",
+    "level": 7,
+    "prereqs": [
+      "exception"
+    ],
+    "short": "The statement that creates an exception and throws it. It stops the current function and sends the problem up to its callers.",
+    "body": "<p>Python raises some [[exception|exceptions]] by itself, like <code>AttributeError</code>. Your own code can raise one too, with the <code>raise</code> statement. You write <code>raise</code>, then the exception, usually with a message, as in <code>raise ValueError('price must be positive')</code>. Python stops the current [[function|function]] at that line, and the exception starts travelling up.</p>\n<p>Programmers raise an exception when a function finds a problem it should not hide. Returning an empty value would let the caller carry on as if all was fine. Raising forces someone to deal with the problem, and the message tells them what happened.</p>\n<p>A good message names the cause and the fix. \"config file not found at /etc/shop.json; set SHOP_CONFIG to its path\" saves the reader a search. \"error\" does not.</p>\n<p>A bare <code>raise</code>, with nothing after it, inside an <code>except</code> block throws the same exception again. Code does this to log a failure and still let a caller higher up handle it.</p>",
+    "example": {
+      "title": "Failing at once with a clear message",
+      "code": "def load_config(path):\n    if not os.path.exists(path):\n        raise FileNotFoundError(\n            f'config file not found at {path}; '\n            'set SHOP_CONFIG to its path'\n        )\n    with open(path) as f:\n        return json.load(f)",
+      "notes": [
+        "A function that reads a settings file.",
+        "Checks whether the file is there.",
+        "Creates a FileNotFoundError and throws it. The function stops here.",
+        "The first part of the message, with the path filled in.",
+        "The second part, which names the fix. Python joins the two pieces of text into one message.",
+        "Closes the call that creates the exception.",
+        "Runs only when the file exists.",
+        "Reads the file and turns its JSON text into data."
+      ]
+    }
+  },
+  "finally": {
+    "id": "finally",
+    "title": "finally",
+    "level": 7,
+    "prereqs": [
+      "try-except"
+    ],
+    "short": "A block after try that always runs, whether the code worked, failed or returned early. Programmers use it for cleanup.",
+    "body": "<p>A <code>finally</code> block sits after <code>try</code>, and after any <code>except</code> blocks. Python runs it no matter how the <code>try</code> block ends. It runs if the code finished normally. It runs if an [[exception|exception]] flew out. It even runs if the code hit a [[return|return]] statement. Think of switching off the lights when you leave a room, however you leave it.</p>\n<p>Programmers put cleanup there, the work that must happen even when things go wrong. Closing a file, releasing a [[lock|lock]], shutting down a [[thread-pool|thread pool]] and putting a setting back are common examples.</p>\n<p>Python's <code>with</code> statement is a shorter way to get the same guarantee for one object. <code>with open(path) as f:</code> closes the file at the end of the block, whatever happens inside. In review, look for cleanup that sits after the main work with no <code>finally</code>. One error skips it.</p>",
+    "example": {
+      "title": "Closing a resource however the work ends",
+      "code": "conn = open_connection(db_url)\ntry:\n    return run_report(conn)\nfinally:\n    conn.close()",
+      "notes": [
+        "Opens a database connection.",
+        "Starts the protected block.",
+        "Runs the report and returns its result. The return waits until the finally block has run.",
+        "This block runs after the report, whether it returned or raised an exception.",
+        "Closes the connection in every case."
+      ]
+    }
+  },
+  "custom-exception": {
+    "id": "custom-exception",
+    "title": "Custom exception class",
+    "level": 7,
+    "prereqs": [
+      "inheritance"
+    ],
+    "short": "Your own named kind of exception, made by inheriting from a built-in one, so callers can catch exactly that problem.",
+    "body": "<p>Python has many built-in [[exception|exception]] types, such as <code>ValueError</code> and <code>TypeError</code>. You can make your own with a [[class|class]] that inherits from one of them. The class often holds nothing but a [[comment|docstring]], because all its behavior comes from the parent. What matters is the name.</p>\n<p>A named exception lets callers react to one specific problem. An <code>except EmptyReplyError:</code> line catches only that problem and lets every other error pass by. Because of [[inheritance|inheritance]], the new exception is still a <code>ValueError</code>. Older code that catches <code>ValueError</code> keeps working with no change.</p>\n<p>Order matters when you catch them. Python uses the first <code>except</code> line that matches. A specific error is also an instance of its parent type, so the specific <code>except</code> line must come first. With the order reversed, the general line catches the specific error and handles it the wrong way.</p>",
+    "example": {
+      "title": "Defining a named error and catching it before the general one",
+      "code": "class EmptyReplyError(ValueError):\n    \"\"\"Raised when a service sends back no text at all.\"\"\"\n\ntry:\n    data = read_reply(response)\nexcept EmptyReplyError as exc:\n    print('The service sent no text:', exc)\nexcept ValueError as exc:\n    print('The reply was not valid JSON:', exc)",
+      "notes": [
+        "Creates a new exception type. The ValueError in brackets is its parent class.",
+        "The docstring is the whole body. The class needs nothing else.",
+        "",
+        "Starts a protected block.",
+        "Reads a reply that should hold JSON.",
+        "Catches only the empty reply problem. The more specific exception comes first.",
+        "Handles it, for example by telling the operator what to check.",
+        "Catches every other ValueError, such as a reply that is not valid JSON.",
+        "Handles that case differently."
+      ]
+    }
+  },
+  "algorithm": {
+    "id": "algorithm",
+    "title": "Algorithm",
+    "level": 8,
+    "prereqs": [
+      "program"
+    ],
+    "short": "A step-by-step method for solving a problem, written precisely enough for a computer to follow.",
+    "body": "<p>An <b>algorithm</b> is a fixed list of steps that turns an input into an output. A recipe is an algorithm for a cake. Long division is an algorithm for dividing numbers. In a [[program|program]], an algorithm is usually one or a few [[function|functions]] that carry out the steps.</p>\n<p>Programmers think in algorithms because the steps decide what the program does in every case, not only the common one. Two algorithms can give the same answer on easy inputs and very different answers on hard ones. So a programmer asks what happens with an empty input, a huge input, or a strange one.</p>\n<p>Speed is the other question. Finding repeats by checking every pair in a list of 1,000 items takes about 500,000 comparisons. Putting the items in a [[set|set]] takes about 1,000 steps. A change that looks small can turn a fast step into a slow one when the input grows.</p>\n<p>When you review a change to an algorithm, run one ordinary input and one edge case through the steps by hand.</p>",
+    "example": {
+      "title": "Two algorithms for the same question",
+      "code": "def has_repeat_slow(items):\n    for i in range(len(items)):\n        for j in range(i + 1, len(items)):\n            if items[i] == items[j]:\n                return True\n    return False\n\ndef has_repeat_fast(items):\n    return len(set(items)) < len(items)",
+      "notes": [
+        "The first algorithm. It compares every pair.",
+        "Take each item in turn...",
+        "...and compare it with every item after it.",
+        "Two equal items means a repeat.",
+        "Stop as soon as one is found.",
+        "No pair matched. For 1,000 items this checks about 500,000 pairs.",
+        "",
+        "The second algorithm. It lets a set do the work.",
+        "A set drops repeats, so a shorter set means there was a repeat. About 1,000 steps for 1,000 items."
+      ]
+    }
+  },
+  "budget": {
+    "id": "budget",
+    "title": "Budgets and truncation",
+    "level": 8,
+    "prereqs": [
+      "algorithm"
+    ],
+    "short": "A fixed allowance, such as 4,000 characters, that code shares out between parts of a text, cutting each part to fit.",
+    "body": "<p>A <b>budget</b> in code works like a money budget. There is a fixed amount to spend, and the code decides who gets how much. The currency is often characters or bytes, for example in a log line, a database field, an error report or a message sent to another service.</p>\n<p><b>Truncation</b> means cutting text to fit. The simplest cut keeps the first N characters. That works for a short name. For a long file or log it can hide what matters, because the last lines, such as the final <code>ValueError: ...</code> of an error log, are often the important ones. A head and tail cut keeps the start and the end and drops the middle, with a note that says how much was dropped.</p>\n<p>Sharing is the other half. If one message holds two long fields and one short one, giving each long field <code>budget // 2</code> (see [[number|integer division]]) leaves room for the short field. Without a split, the first long field can use it all and push the short field, perhaps an exit code, out.</p>\n<p>In review, ask what the reader of the cut text needs to see, and check that the code keeps it.</p>",
+    "example": {
+      "title": "A head and tail cut",
+      "code": "def keep_ends(text, budget):\n    if len(text) <= budget:\n        return text\n    head = (budget * 2) // 3\n    tail = budget - head\n    return f'{text[:head]} ... {text[-tail:]} ({len(text)} chars, middle omitted)'",
+      "notes": [
+        "Defines a function that fits one piece of text into its budget.",
+        "Checks whether the whole text fits.",
+        "It fits, so the text is shown whole.",
+        "Two thirds of the budget go to the start. With 4,000 that is 2,666.",
+        "The rest goes to the end, here 1,334.",
+        "Keeps the start and the end, marks the gap with ' ... ', and reports the full length."
+      ]
+    }
+  },
+  "hash": {
+    "id": "hash",
+    "title": "Hashing and fingerprints",
+    "level": 8,
+    "prereqs": [
+      "string"
+    ],
+    "short": "A short fixed-size code computed from data. Equal data gives an equal code, so programs use it to spot repeats.",
+    "body": "<p>A <b>hash function</b> reads any amount of data and produces a short code of fixed size, called a hash or fingerprint. SHA-256, a common one, always gives 64 hexadecimal characters, the digits 0 to 9 and the letters a to f. Equal input always gives an equal fingerprint. Change one character of the input and the fingerprint changes completely. Two different inputs with the same SHA-256 fingerprint are so unlikely that programs treat it as impossible.</p>\n<p>That makes a fingerprint a cheap way to ask \"have I seen this exact data before?\" Comparing two 64-character codes is fast, even when the data behind them is a 100 KB file. git names every [[commit|commit]] by a hash of its contents.</p>\n<p>To fingerprint structured data, first turn it into text in a fixed form. <code>{'a': 1, 'b': 2}</code> and <code>{'b': 2, 'a': 1}</code> hold the same data, but they print in a different order. <code>json.dumps(data, sort_keys=True)</code> gives both the same text, so they get the same fingerprint.</p>\n<p>Python's [[dict|dictionaries]] use a faster, simpler kind of hash to find keys (see [[hash-table|hash table]]).</p>",
+    "example": {
+      "title": "Fingerprinting a small record",
+      "code": "import hashlib\nimport json\n\nrecord = {'path': 'docs/intro.md', 'version': 1}\ntext = json.dumps(record, sort_keys=True)\nfingerprint = hashlib.sha256(text.encode('utf-8')).hexdigest()\nprint(len(fingerprint))",
+      "notes": [
+        "Loads Python's module of hash functions.",
+        "Loads the JSON module, which turns data into text.",
+        "",
+        "A small record, a dictionary with two fields.",
+        "Turns it into JSON text with the keys in sorted order, so equal data always gives equal text.",
+        "Turns the text into bytes, hashes them with SHA-256, and writes the hash as hexadecimal text.",
+        "Prints 64. Every SHA-256 fingerprint has that length, whatever the size of the input."
+      ]
+    }
+  },
+  "hash-table": {
+    "id": "hash-table",
+    "title": "Hash table (how a dict finds keys fast)",
+    "level": 8,
+    "prereqs": [
+      "dict"
+    ],
+    "short": "The structure behind a Python dictionary. It uses a hash of the key to jump straight to the right slot instead of searching.",
+    "body": "<p>A Python [[dict|dictionary]] finds a key almost at once, whether it holds 10 entries or 10 million. It can because it is a <b>hash table</b>. When you store a key, Python computes a [[hash|hash]] of the key and uses that number to pick a slot in a hidden array. To look the key up later, Python computes the same hash and goes straight to the same slot.</p>\n<p>Think of a cloakroom. You hand over your coat and get ticket 47. Later the attendant goes straight to hook 47 instead of checking every coat. The hash is the ticket number, worked out from the key itself.</p>\n<p>A [[set|set]] works the same way, without the values. That is why \"is this in the set?\" stays fast while \"is this in the list?\" gets slower as the list grows.</p>\n<p>The method <code>setdefault</code> asks \"seen it before?\" in one step. <code>seen.setdefault(key, value)</code> stores <code>value</code> if the key is new and returns it. If the key is already there, it changes nothing and returns the value stored first. A separate check followed by a store takes two steps, and two [[thread|threads]] can both slip in between them (see [[race-condition|race condition]]).</p>",
+    "example": {
+      "title": "setdefault checks and stores in one step",
+      "code": "seen = {}\nfirst = seen.setdefault('3f9a...e1', 'item-0')\nprint(first)\nagain = seen.setdefault('3f9a...e1', 'item-5')\nprint(again)\nprint(seen)",
+      "notes": [
+        "An empty table.",
+        "'3f9a...e1' stands for a 64-character fingerprint. It is new, so setdefault stores 'item-0' and returns it.",
+        "Prints item-0, the value just stored. This item is new.",
+        "The same fingerprint again, from a later item. setdefault changes nothing and returns the first value.",
+        "Prints item-0, not item-5. The code can compare the two and report a repeat.",
+        "Prints {'3f9a...e1': 'item-0'}. The table still holds one entry."
+      ]
+    }
+  },
+  "recursion": {
+    "id": "recursion",
+    "title": "Recursion",
+    "level": 8,
+    "prereqs": [
+      "function"
+    ],
+    "short": "A function that solves a problem by calling itself on a smaller piece, with a stopping rule so it ends.",
+    "body": "<p><b>Recursion</b> means a [[function|function]] calls itself. It fits data that has the same shape inside itself, like a [[dict|dictionary]] whose values are more dictionaries, or a folder that holds more folders. The function handles one level, and for each value one level down it [[call|calls]] itself again.</p>\n<p>Every recursive function needs a stopping rule, called the <b>base case</b>. Without one, it calls itself forever, and Python stops it after about 1,000 nested calls with a <code>RecursionError</code>. Russian nesting dolls are the usual picture. You open a doll, find a smaller one inside, and open that, until you reach the solid doll in the middle.</p>\n<p>Plain values, such as numbers and short text, are natural base cases. A depth limit adds a second one for safety. Data can contain itself, as after <code>d['self'] = d</code>, and then only a depth limit stops the function. In review, find the base cases first and check that every path reaches one.</p>",
+    "example": {
+      "title": "Describing nested data, with a depth limit",
+      "code": "def describe(value, depth=0):\n    if depth > 6:\n        return '...'\n    if isinstance(value, dict):\n        lines = []\n        for k, v in value.items():\n            lines.append(f'{k}: {describe(v, depth + 1)}')\n        return '\\n'.join(lines)\n    return str(value)",
+      "notes": [
+        "A function that describes a value. depth says how far down the value sits.",
+        "The first base case. Past depth 6, stop going deeper.",
+        "Returns a marker instead of calling itself again.",
+        "Is the value a dictionary? Then it holds more values to describe.",
+        "Collects one line per field.",
+        "Goes through each key and value of the dictionary.",
+        "The recursive call. It describes the inner value one level deeper.",
+        "Joins the lines with line breaks and returns them.",
+        "The second base case. A plain value, such as 1 or 'lamp', becomes text directly."
+      ]
+    }
+  },
+  "regex": {
+    "id": "regex",
+    "title": "Regular expression",
+    "level": 8,
+    "prereqs": [
+      "string"
+    ],
+    "short": "A small pattern language for finding text, such as every order number in a log or every {{name}} tag in a template.",
+    "body": "<p>A <b>regular expression</b>, or regex, is a pattern that describes text. Python's <code>re</code> [[module-import|module]] can search a [[string|string]] for any text that matches the pattern. Most characters match themselves. A few have special meanings.</p>\n<ul><li><code>.</code> matches any one character, and <code>\\.</code> matches a real dot.</li><li><code>\\d</code> matches a digit, and <code>\\w</code> matches a letter, a digit or an underscore.</li><li><code>+</code> means \"one or more of the thing before it\", <code>*</code> means \"zero or more\", and <code>?</code> means \"optional\".</li><li><code>( )</code> captures the matched part, so the code can read it afterwards.</li><li><code>(?: )</code> groups a part without capturing it.</li></ul>\n<p>Programmers reach for regex when \"does this text contain X?\" is not enough and they need structure out of the text. Regex is compact but hard to read, so careful code puts a comment or an example next to each pattern. In review, test a changed pattern against one text it should match and one it should not.</p>",
+    "example": {
+      "title": "Reading the parts of a template tag",
+      "code": "import re\n\nTAG = re.compile(r'\\{\\{(\\w+)(?::(\\w+))?\\}\\}')\nm = TAG.search('Hello {{name:upper}}, your order shipped.')\nprint(m.group(1))\nprint(m.group(2))\nprint(TAG.findall('{{a}} and {{b:lower}}'))",
+      "notes": [
+        "Loads Python's regex module.",
+        "",
+        "The pattern. Two opening braces, a name, an optional colon and format, then two closing braces.",
+        "Searches a template. m holds the first match.",
+        "Prints name, the first captured part.",
+        "Prints upper, the optional format.",
+        "findall returns every match. Prints [('a', ''), ('b', 'lower')]."
+      ]
+    }
+  },
+  "parsing": {
+    "id": "parsing",
+    "title": "Parsing",
+    "level": 8,
+    "prereqs": [
+      "json"
+    ],
+    "short": "Turning text into structured data a program can use, like turning a JSON reply into a Python dictionary.",
+    "body": "<p><b>Parsing</b> means reading text and building structured data from it. A web service replies with text, and the program needs a [[dict|dictionary]] with fields it can read. <code>json.loads</code> parses [[json|JSON]] text into that dictionary. It is strict. If the text is not exactly JSON, it raises <code>json.JSONDecodeError</code>.</p>\n<p>Text from outside is not always exact. A reply may carry a remark after the JSON, or a sentence before it. A parser can be strict and refuse such input, or lenient and dig the data out.</p>\n<p>Lenient parsing needs care. Reading one complete JSON value from the start and ignoring a remark after it is safe, because the data is clearly there. Grabbing the first <code>{...}</code> found anywhere in a paragraph is risky, because the paragraph may contain an example object. Running on the wrong data is worse than failing with a clear error. In review, ask what the new parser accepts that the old one refused, and whether any of it could be the wrong data.</p>",
+    "example": {
+      "title": "Keeping a complete JSON value and dropping the remark after it",
+      "code": "import json\n\nreply = '{\"ok\": true, \"count\": 4} Hope that helps!'\ntry:\n    data = json.loads(reply)\nexcept json.JSONDecodeError as e:\n    if e.msg != 'Extra data':\n        raise\n    data, end = json.JSONDecoder().raw_decode(reply)\nprint(data['count'])",
+      "notes": [
+        "Loads Python's JSON module.",
+        "",
+        "A reply with a complete JSON object followed by a remark.",
+        "Starts a protected block.",
+        "The strict parser reads the object, finds more text after it, and raises JSONDecodeError.",
+        "Catches that error and names it e.",
+        "Checks the error's message. Only the 'Extra data' case is safe to repair.",
+        "Throws any other parse error again, unchanged.",
+        "Reads one complete value from the start. end is the position where it stopped.",
+        "Prints 4. The remark was ignored."
+      ]
+    }
+  },
+  "deep-copy": {
+    "id": "deep-copy",
+    "title": "Copy and deep copy",
+    "level": 8,
+    "prereqs": [
+      "object"
+    ],
+    "short": "Making a fully separate duplicate of an object, so that changing the copy cannot change the original.",
+    "body": "<p>In Python, <code>b = a</code> does not copy anything. It gives the same [[object|object]] a second name. Change the object through <code>b</code> and <code>a</code> sees the change, because there is only one object. It is like two people holding keys to the same locker.</p>\n<p>A <b>shallow copy</b> makes a new outer object, but the objects inside it are still shared. <code>dict(order)</code> and <code>list(items)</code> are shallow copies. A <b>deep copy</b> duplicates everything, all the way down, so nothing is shared. Python's <code>copy.deepcopy(x)</code> makes one.</p>\n<p>Code deep-copies data it is about to edit when the original must stay as it was, for example a request that the next step will use again. The reverse also matters. A deep copy carries everything the original already held. If code copies an object and then adds something the original already had, the copy now holds it twice.</p>",
+    "example": {
+      "title": "A second name versus a real copy",
+      "code": "import copy\n\nrequest = {'questions': ['Where is my order?'], 'goals': []}\nsame = request\nr = copy.deepcopy(request)\nr['goals'].append(r['questions'][0])\nr['questions'] = []\nprint(request['questions'])\nprint(same is request)",
+      "notes": [
+        "Loads Python's copy module.",
+        "",
+        "A request with one question and no goals.",
+        "A second name for the same object. Nothing is copied.",
+        "A separate duplicate, including new inner lists.",
+        "Moves the question into the copy's goals.",
+        "Empties the copy's list of questions.",
+        "Prints ['Where is my order?']. The original was not touched.",
+        "Prints True. same and request are one object with two names."
+      ]
+    }
+  },
+  "thread": {
+    "id": "thread",
+    "title": "Thread",
+    "level": 9,
+    "prereqs": [
+      "program"
+    ],
+    "short": "One line of work inside a running program. A program can run several threads at the same time.",
+    "body": "<p>A [[program|program]] normally does one thing at a time, line after line. A <b>thread</b> is one such line of work. A program can start more threads, and they run at the same time. Picture a kitchen with several cooks. Each cook follows a recipe, and all of them share the same kitchen.</p>\n<p>Threads help most when the work spends its time waiting. A request to a web service mostly waits for the reply. While one thread waits, others can make their own requests. Five downloads on five threads can finish in about the time of the slowest one.</p>\n<p>Threads share the program's memory. That is useful, because they can all write results into one [[list|list]]. It is also a source of bugs, because two threads can touch the same data at once. The lessons on [[race-condition|race conditions]] and [[lock|locks]] cover that.</p>\n<p>One limit shapes a lot of code. Python cannot stop a thread from outside. If a call hangs forever, the thread running it hangs too. The program can only stop waiting for it, as the [[timeout|timeout]] lesson shows.</p>",
+    "example": {
+      "title": "Running one job on its own thread, with a limit on the wait",
+      "code": "thread = threading.Thread(target=download)\nthread.start()\nthread.join(timeout=10)\nfinished = not thread.is_alive()\nif not finished:\n    print('still downloading, moving on')",
+      "notes": [
+        "Creates a thread whose job is download, a function defined elsewhere. It has not started yet.",
+        "Starts the thread. From here on it runs at the same time as the rest of the program.",
+        "Waits for the thread to finish, but stops waiting after 10 seconds.",
+        "True if the download ended in time.",
+        "The thread is still running.",
+        "The program cannot stop the thread. It can only stop waiting and carry on."
+      ]
+    }
+  },
+  "thread-pool": {
+    "id": "thread-pool",
+    "title": "Thread pool and futures",
+    "level": 9,
+    "prereqs": [
+      "thread"
+    ],
+    "short": "A fixed team of worker threads that takes jobs from a queue. A Future is the ticket for a job's result.",
+    "body": "<p>Starting a new [[thread|thread]] for every small job is wasteful, and a thousand threads at once can overload a machine. A <b>thread pool</b> keeps a fixed team of worker threads instead. You hand it jobs. Each free worker takes the next job from a queue, and when it finishes, it takes another.</p>\n<p>When you hand over a job with <code>pool.submit(...)</code>, you get back a <b>Future</b> at once. A Future is like the buzzer a restaurant gives you when you order. The food is not ready yet, but the buzzer tells you when it is. <code>future.result()</code> gives you the job's [[return|return]] value once it is done. <code>wait(...)</code> waits for several Futures and can stop as soon as the first one finishes.</p>\n<p>Python's <code>ThreadPoolExecutor</code> is a thread pool. Jobs finish in any order, so code that needs results in the original order keeps a [[dict|dictionary]] from each Future to its position.</p>\n<p>Watch how the pool ends. Leaving a <code>with ThreadPoolExecutor(...)</code> block waits for every job, including a stuck one. <code>pool.shutdown(wait=False, cancel_futures=True)</code> cancels queued jobs and does not wait for running ones.</p>",
+    "example": {
+      "title": "Running jobs on a pool and keeping their order",
+      "code": "urls = ['a.example', 'b.example', 'c.example']\nresults = [None] * len(urls)\nwith ThreadPoolExecutor(max_workers=8) as pool:\n    future_to_idx = {pool.submit(fetch, u): i for i, u in enumerate(urls)}\n    for future in as_completed(future_to_idx):\n        results[future_to_idx[future]] = future.result()",
+      "notes": [
+        "Three pages to download.",
+        "One empty slot per page, so results keep the list's order.",
+        "Creates a pool of up to 8 workers. Leaving the block waits for every job.",
+        "Submits every job. Each submit returns a Future at once, and the dictionary remembers its position.",
+        "Takes each Future as soon as its job finishes, in whatever order that happens.",
+        "Puts the result in its own slot."
+      ]
+    }
+  },
+  "concurrency": {
+    "id": "concurrency",
+    "title": "Concurrency",
+    "level": 9,
+    "prereqs": [
+      "thread"
+    ],
+    "short": "Having two or more pieces of work in progress at the same time, such as two requests handled by one server.",
+    "body": "<p><b>Concurrency</b> means more than one piece of work is in progress at once. The pieces may truly run at the same moment on different processor cores, or they may take turns quickly. Either way, the second one starts before the first one ends. [[thread|Threads]] are one way to get concurrency in Python, and <code>async</code> code is another.</p>\n<p>Concurrency is good for speed and bad for simple reasoning. Code that is correct when it runs alone can break when another copy runs beside it. Any data that both pieces of work can see becomes a place where they can collide.</p>\n<p>Concurrency often hides at two levels. Inside one request, code may run several jobs at once on a [[thread-pool|thread pool]]. Across requests, a server may handle two users at the same time with one shared [[object|object]]. The second level is easy to miss, because each request's code looks like it runs alone. That is where [[shared-state|shared state]] bugs come from.</p>\n<p>In review, take each piece of data the change writes and ask who else can see it at the same time.</p>",
+    "example": {
+      "title": "Two requests in progress at once",
+      "code": "service = OrderService()\na = threading.Thread(target=service.handle, args=(request_a,))\nb = threading.Thread(target=service.handle, args=(request_b,))\na.start()\nb.start()\na.join()\nb.join()",
+      "notes": [
+        "One object, shared by every request the server handles.",
+        "Prepares a thread for the first request.",
+        "Prepares a thread for the second request.",
+        "The first request starts.",
+        "The second request starts before the first one ends. Both now run methods on the same service.",
+        "Waits for the first to finish.",
+        "Waits for the second to finish."
+      ]
+    }
+  },
+  "race-condition": {
+    "id": "race-condition",
+    "title": "Race condition",
+    "level": 9,
+    "prereqs": [
+      "concurrency"
+    ],
+    "short": "A bug where the result depends on which thread gets somewhere first, so it shows up only some of the time.",
+    "body": "<p>A <b>race condition</b> is a bug whose outcome depends on timing. Two [[thread|threads]] touch the same data, and the result changes with which one goes first. Most runs come out fine. Now and then the order is unlucky and the data ends up wrong. That makes race conditions hard to find, because they rarely show up when you look for them.</p>\n<p>A classic shape is \"check, then act\". Thread A checks that a slot is empty. Before A writes, thread B checks the same slot, and it is still empty. Both write, and both believe they were first. Another shape is a reset. Request B replaces a shared table with an empty one while request A is still using it, and A's entries vanish.</p>\n<p>The fixes are to do the check and the write in one step (see [[hash-table|setdefault]]), to guard the steps with a [[lock|lock]], or to stop sharing the data at all.</p>\n<p>A good test for a race does not rely on luck or on sleeping. It uses events to pause one thread at a known point, runs the other, and then lets the first go on. That forces the unlucky order every time.</p>",
+    "example": {
+      "title": "Check, then act, step by step",
+      "code": "if key not in cache:\n    # thread B runs the same check here and also finds no key\n    cache[key] = build(key)\n\nvalue = cache.setdefault(key, candidate)",
+      "notes": [
+        "Thread A checks. The key is not there.",
+        "Before A writes, the system switches to thread B, which passes the same check.",
+        "Both threads build the value and write it. One of them does the work for nothing, or overwrites the other.",
+        "",
+        "One fix. setdefault checks and writes in one step, so only the first thread's value is kept."
+      ]
+    }
+  },
+  "lock": {
+    "id": "lock",
+    "title": "Lock",
+    "level": 9,
+    "prereqs": [
+      "race-condition"
+    ],
+    "short": "A tool that lets only one thread at a time into a section of code, so steps that belong together are not interrupted.",
+    "body": "<p>A <b>lock</b> guards a piece of code. A [[thread|thread]] must take the lock before it enters, and it gives the lock back when it leaves. If another thread holds the lock, the newcomer waits. Think of the single bathroom key at a cafe. Whoever holds the key is inside, and everyone else waits for it.</p>\n<p>Locks fix [[race-condition|race conditions]] by making a group of steps happen as one. In Python you create a lock with <code>threading.Lock()</code>. A block that starts with <code>with self._lock:</code> holds the lock. Python takes it at the start of the block and releases it at the end, even if an [[exception|exception]] is raised inside.</p>\n<p>Hold a lock only around your own bookkeeping, never around a call that might hang. If code holds a lock while it writes to a slow service, and the write hangs, every other thread that needs the lock hangs too. A safer shape takes the lock to check and record, releases it for the slow call, then takes it again to see whether anything changed in the meantime.</p>\n<p>Two threads that take two locks in opposite orders can wait on each other forever, which is called a <b>deadlock</b>.</p>",
+    "example": {
+      "title": "Checking under a lock before and after a slow write",
+      "code": "def put(self, key, value):\n    with self._lock:\n        if self._closed:\n            return False\n        self._keys.add(key)\n    self._store.put(self._prefix + key, value)\n    with self._lock:\n        closed = self._closed\n    if closed:\n        self._store.clear(self._prefix + key)\n        return False\n    return True",
+      "notes": [
+        "Stores a value. self._lock was created in __init__ with threading.Lock().",
+        "Takes the lock, only for the bookkeeping below.",
+        "Checks whether the cache has already been closed.",
+        "Refuses the late write. The lock is released as the function returns.",
+        "Notes the key, so close can clear it later.",
+        "The slow write, with the lock released. A hanging write cannot block close.",
+        "Takes the lock again, briefly.",
+        "Did someone close the cache while the write was in progress?",
+        "If so,",
+        "clear the key again, because close may have run before the value landed.",
+        "And report the write as refused.",
+        "Otherwise report success."
+      ]
+    }
+  },
+  "timeout": {
+    "id": "timeout",
+    "title": "Timeout and deadline",
+    "level": 9,
+    "prereqs": [
+      "thread-pool"
+    ],
+    "short": "Giving up on something after a set time. A deadline is the same limit stated as a moment, such as start time plus 30 seconds.",
+    "body": "<p>A <b>timeout</b> is a limit on waiting. If an answer has not come within the limit, the program stops waiting and treats the job as failed. A <b>deadline</b> is the same idea stated as a moment, \"start time plus 30 seconds\", instead of a length of time.</p>\n<p>Programs need timeouts because the outside world can hang. A web service may never reply. Without a limit, the code that waits for it waits forever, and so does the user. Many libraries wait forever by default. Python's <code>requests.get</code> has no timeout unless you pass one.</p>\n<p>The details matter.</p>\n<ul><li>Start each job's clock when the job really starts. A job queued behind busy workers should not lose its time while it waits.</li><li>Measure with <code>time.monotonic()</code>. A wall clock can jump when the computer corrects its time. A monotonic clock only moves forward.</li><li>Decide what happens to the late result. A job that timed out may still finish later on its [[thread|thread]], and nothing should use its result by mistake.</li></ul>\n<p>A comment or setting that promises a timeout proves nothing. In review, find the line that enforces it.</p>",
+    "example": {
+      "title": "Each job's clock starts when its worker starts it",
+      "code": "LIMIT_S = 30\nstarted = {}\n\ndef run_one(job, idx):\n    started[idx] = time.monotonic()\n    return job()\n\nnow = time.monotonic()\nfor idx, t0 in list(started.items()):\n    if now >= t0 + LIMIT_S and idx not in results:\n        results[idx] = {'error': f'TimeoutError: no result after {LIMIT_S} s'}",
+      "notes": [
+        "The limit for one job, in seconds.",
+        "The moment each job really started, by position.",
+        "",
+        "The function each worker thread runs for one job.",
+        "Records the start on the monotonic clock, only once a worker picks the job up.",
+        "Runs the job.",
+        "",
+        "In the main thread, reads the clock.",
+        "Looks at a copy of the table, because worker threads may add to it during the loop.",
+        "Its deadline has passed and it has no result.",
+        "Records the timeout and stops waiting for it."
+      ]
+    }
+  },
+  "contextvar": {
+    "id": "contextvar",
+    "title": "Context variable",
+    "level": 9,
+    "prereqs": [
+      "variable"
+    ],
+    "short": "A variable whose value belongs to the current task, so code running at the same time each sees its own value.",
+    "body": "<p>The whole program shares a normal module-level [[variable|variable]]. If one [[thread|thread]] sets it, another thread that reads it a moment later sees that value. That breaks when two requests run at the same time and each needs its own value, such as its request id for the logs.</p>\n<p>A <b>context variable</b>, from Python's <code>contextvars</code> module, solves this. Each thread or async task has its own context, a private set of values for every context variable. <code>VAR.set(value)</code> changes the value in the current context only and returns a token, which works as a receipt. <code>VAR.reset(token)</code> puts the old value back, and <code>VAR.get()</code> reads the current context's value.</p>\n<p>Why not pass the value as a [[parameter|parameter]]? Because it must travel through many layers of code that do not know about it, such as a logging call deep inside a library.</p>\n<p>Worker threads in a [[thread-pool|thread pool]] do not inherit the context. Code that hands a job to a pool wraps it in <code>contextvars.copy_context().run</code> so the job sees the caller's values.</p>",
+    "example": {
+      "title": "Setting a per-request value and putting it back",
+      "code": "REQUEST_ID = contextvars.ContextVar('request_id', default=None)\n\ndef log_saved():\n    log.info('saved order request_id=%s', REQUEST_ID.get())\n\ntoken = REQUEST_ID.set('req-42')\ntry:\n    handle(request)\nfinally:\n    REQUEST_ID.reset(token)",
+      "notes": [
+        "Creates the context variable once, at module level. Its value starts as None.",
+        "",
+        "A logging helper deep inside the code.",
+        "Reads the request id for the current context only. No parameter carried it here.",
+        "",
+        "At the start of a request, sets this request's id and keeps the receipt.",
+        "Starts a protected block.",
+        "Does the work. Somewhere inside, log_saved runs and sees req-42.",
+        "Runs however the request ends.",
+        "Puts the previous value back."
+      ]
+    }
+  },
+  "api": {
+    "id": "api",
+    "title": "API and HTTP request",
+    "level": 10,
+    "prereqs": [
+      "program"
+    ],
+    "short": "An agreed way for one program to ask another for something, often by sending an HTTP request over the network.",
+    "body": "<p>An <b>API</b>, short for application programming interface, is a set of requests that one [[program|program]] accepts from others, with fixed names and data shapes. A restaurant menu is a fair picture. You can order what is on it, in the way it says, and the kitchen stays out of sight.</p>\n<p>Many APIs work over HTTP, the same system a web browser uses. The calling program sends a request to an address such as <code>https://api.example.com/orders/42</code>. The request has a method, such as <code>GET</code> to read or <code>POST</code> to send data. It has headers, extra details such as the key that proves who is asking. It may also have a body, often [[json|JSON]]. The server sends back a response with a status code and a body. 200 means success, 404 means \"not found\", 429 means \"too many requests, slow down\", and codes from 500 up mean the server failed.</p>\n<p>Network requests fail in ordinary ways. Good client code sets a [[timeout|timeout]], retries errors that may pass, such as 429 and 503, waits longer before each new try, and fails at once on errors that waiting cannot fix, such as a bad key.</p>",
+    "example": {
+      "title": "One API request made by hand",
+      "code": "import requests\n\nresponse = requests.get(\n    'https://api.example.com/orders/42',\n    headers={'Authorization': f'Bearer {api_key}'},\n    timeout=10,\n)\nprint(response.status_code)\nprint(response.json()['status'])",
+      "notes": [
+        "Loads requests, a popular Python library for HTTP.",
+        "",
+        "Sends an HTTP GET request and waits for the response.",
+        "The address of the thing to read.",
+        "A header. The key proves who is asking.",
+        "Gives up after 10 seconds instead of waiting forever.",
+        "Closes the call.",
+        "Prints 200 when the request worked.",
+        "Parses the JSON body and reads one field, such as 'shipped'."
+      ]
+    }
+  },
+  "test": {
+    "id": "test",
+    "title": "Test",
+    "level": 11,
+    "prereqs": [
+      "function"
+    ],
+    "short": "Code that runs your code with a known input and checks that the result is what you expect.",
+    "body": "<p>A <b>test</b> is a small [[program|program]] that checks another program. It sets up an input, runs the code under test, and compares the result with the expected one. If they match, the test passes. If not, it fails and says where.</p>\n<p>People also test by hand, by running the program and looking at it. Tests in code are exact, because they compare values instead of impressions. They are repeatable, so the same checks run again after every change, in seconds. And they record intent. A test named <code>test_exit_code_survives_long_output</code> tells the next programmer what the code must do.</p>\n<p>In Python a test is usually a [[function|function]] whose name starts with <code>test_</code>. It uses [[assert|assert]] lines for its checks, and a tool such as [[pytest|pytest]] finds it and runs it.</p>\n<p>A test for a bug fix should fail on the old code and pass on the new code. If it passes on both, it does not prove the fix. In review, ask whether the author ran it against the old code.</p>",
+    "example": {
+      "title": "A small test",
+      "code": "def test_exit_code_survives_long_output():\n    result = {'stdout': 'o' * 10_000, 'stderr': 'e' * 10_000, 'exit_code': 1}\n\n    summary = summarize(result, budget=4000)\n\n    assert 'exit_code: 1' in summary\n    assert 'e' * 1000 in summary\n    assert len(summary) <= 6000",
+      "notes": [
+        "A test function. pytest runs it because its name starts with test_.",
+        "The input, a command result with two 10,000-character outputs and an exit code.",
+        "",
+        "Runs the code under test.",
+        "",
+        "Check one. The field after the long outputs is still shown.",
+        "Check two. stderr got a real share of the budget, at least 1,000 characters.",
+        "Check three. The summary stays under a hard cap of 6,000 characters."
+      ]
+    }
+  },
+  "assert": {
+    "id": "assert",
+    "title": "assert",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "A line that states something must be true. If it is false, the test stops and fails right there.",
+    "body": "<p><code>assert</code> is a Python statement. It takes a condition, an expression that is [[boolean|True or False]]. If the condition is True, nothing happens and the next line runs. If it is False, Python raises <code>AssertionError</code>, and the [[test|test]] fails at that line.</p>\n<p>When [[pytest|pytest]] runs the test, a failed assert reports more than \"failed\". pytest shows the line and the values on each side. If <code>assert total == 45</code> fails, it prints what <code>total</code> really held. That turns a red mark into a clue.</p>\n<p>Good asserts check what matters to the user, not how the code got there. A test of an error report should check that the report names the cause and keeps the data already gathered, not which internal lines ran.</p>\n<p>An assert should also fail for the right reason. Run a new test on the old code and read the failure. If it fails because of a typo or a missing argument, it is not testing the bug.</p>",
+    "example": {
+      "title": "Two asserts on two users of one store",
+      "code": "def test_two_requests_keep_their_own_values():\n    store = FakeStore()\n    a, b = Cache(store, 'req-a'), Cache(store, 'req-b')\n\n    a.put('result', 'from a')\n    b.put('result', 'from b')\n\n    assert a.get('result') == 'from a'\n    assert b.get('result') == 'from b'",
+      "notes": [
+        "A test function.",
+        "One fake store, shared like a real one.",
+        "Two requests that use the same store, each through its own Cache.",
+        "",
+        "Request a stores a value under the key result.",
+        "Request b stores a different value under the same key.",
+        "",
+        "Must be True. Request a still reads its own value. Without the per-request prefix, b's write would have replaced it.",
+        "Must be True. Request b reads its own value."
+      ]
+    }
+  },
+  "pytest": {
+    "id": "pytest",
+    "title": "pytest",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "The tool that finds test files and test functions, runs them, and reports which passed and which failed.",
+    "body": "<p><b>pytest</b> is the most common tool for running Python [[test|tests]]. You do not list your tests anywhere, because pytest finds them by name. It looks for files named <code>test_*.py</code> and, inside them, for functions whose names start with <code>test_</code>. It runs each one and prints a summary, such as \"24 passed\".</p>\n<p>pytest adds several tools around the plain [[assert|assert]].</p>\n<ul><li>Detailed failure reports that show the values in a failed assert.</li><li><code>@pytest.mark.parametrize</code>, a [[decorator|decorator]] that runs one test with many inputs.</li><li>Markers such as [[xfail|xfail]], for tests that are expected to fail.</li><li>[[fixture|Fixtures]], ready-made helpers a test asks for by name.</li><li><code>pytest.importorskip('numpy')</code>, which skips a whole file when a module is missing instead of failing it.</li></ul>\n<p><code>pytest -k cart</code> runs only the tests whose names contain \"cart\", and <code>pytest -x</code> stops at the first failure. A skipped test counts as neither passed nor failed, so in review, read the skip count too.</p>",
+    "example": {
+      "title": "One test, seven runs",
+      "code": "@pytest.mark.parametrize(\n    ('raw', 'expected'),\n    [(True, True), ('true', True), (' TRUE ', True), (False, False), ('false', False), ('False', False), (1, False)],\n)\ndef test_flag_counts_by_meaning(raw, expected):\n    assert parse_flag(raw) is expected",
+      "notes": [
+        "Tells pytest to run the test below once per input.",
+        "The names of the two values each run receives.",
+        "Seven pairs. Each holds a raw value and what it should mean.",
+        "Closes the decorator.",
+        "The test. pytest fills in raw and expected for each pair.",
+        "The cleaned value must be exactly True or exactly False. The string 'false' must mean False."
+      ]
+    }
+  },
+  "fake": {
+    "id": "fake",
+    "title": "Fake, stub and mock",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "A stand-in for a slow or unpredictable part, such as a web service or a clock, so a test runs fast and the same every time.",
+    "body": "<p>Real web services are slow, may cost money, and can answer differently each time. Real databases and files carry state from one run to the next. A [[test|test]] that used them would be slow, expensive and unreliable. So tests replace those parts with stand-ins.</p>\n<ul><li>A <b>fake</b> is a working, simplified version, such as an in-memory [[dict|dictionary]] in place of a database.</li><li>A <b>stub</b> returns canned answers and does nothing else.</li><li>A <b>mock</b> also records how it was called, so the test can check the calls.</li></ul>\n<p>Good tests keep the code under test real and fake only the edges. A fake should answer in the same shape as the real part, including its errors, or the test proves less than it seems.</p>\n<p>A fake can stand in for time, too. A test can give the code a clock that moves only when the test moves it. Then it can check a 10-second limit without waiting 10 seconds, and no result depends on how fast the machine is.</p>",
+    "example": {
+      "title": "A fake key and value store",
+      "code": "class FakeStore:\n    def __init__(self, data=None):\n        self.data = dict(data or {})\n\n    def get(self, key):\n        if key in self.data:\n            return {'ok': True, 'value': self.data[key]}\n        return {'ok': False, 'error': f'key {key!r} not found'}\n\nfill_template('Total: {{total}}', store=FakeStore({'total': 42}))",
+      "notes": [
+        "A fake. It stands in for a real key and value store.",
+        "It is built from a plain dictionary.",
+        "It keeps a copy of that dictionary as its data.",
+        "",
+        "The one call the code under test makes.",
+        "If the key is stored,",
+        "it answers in the same shape as the real store, ok and the value.",
+        "Otherwise it answers with ok set to False and an error, as the real store does.",
+        "",
+        "Runs the real code with the fake. It returns 'Total: 42'."
+      ]
+    }
+  },
+  "end-to-end": {
+    "id": "end-to-end",
+    "title": "End-to-end test",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "A test that runs the whole flow, from request to answer, and checks what the user would actually get.",
+    "body": "<p>A <b>unit test</b> checks one small piece, such as one [[function|function]], on its own. An <b>end-to-end test</b> runs the whole flow from start to finish, the way a user would, and checks the final outcome.</p>\n<p>Both kinds are useful. Unit [[test|tests]] are fast and point straight at the broken piece. But pieces that each work can still fail together. A wrong order of steps, a value dropped between two functions, or a setting that never reaches the code that needs it are bugs that no unit test sees.</p>\n<p>A middle kind, often called an integration test, runs several real pieces together and replaces only the slow or costly edges with [[fake|fakes]]. It catches many of the same bugs at a fraction of the cost.</p>\n<p>End-to-end tests are slower and break for more reasons, so projects keep fewer of them. In review, ask which kind of test covers the change. A bug in the order of steps needs a test that runs the steps together.</p>",
+    "example": {
+      "title": "Running the real flow with only the edge faked",
+      "code": "def test_checkout_sends_one_receipt():\n    sent = []\n    app = make_app(send_email=lambda to, text: sent.append((to, text)))\n\n    response = app.checkout(cart=sample_cart(), user='ana@example.com')\n\n    assert response.status == 'paid'\n    assert len(sent) == 1",
+      "notes": [
+        "A test that runs the real checkout flow.",
+        "A list that will collect every email the code tries to send.",
+        "The real app, with only the email sender swapped for a fake that records.",
+        "",
+        "Runs the whole checkout, from cart to order to receipt.",
+        "",
+        "The user gets a paid order.",
+        "Exactly one receipt went out. A bug that sent two would fail here."
+      ]
+    }
+  },
+  "xfail": {
+    "id": "xfail",
+    "title": "Expected failure (xfail)",
+    "level": 11,
+    "prereqs": [
+      "pytest"
+    ],
+    "short": "A pytest marker for a test that is expected to fail, used to record a known bug. With strict=True, an unexpected pass fails the run.",
+    "body": "<p>Sometimes you know a bug exists before you fix it. You can write the test that shows the bug now, but it would fail and turn the whole suite red. <code>@pytest.mark.xfail</code> tells [[pytest|pytest]] that a test is expected to fail. pytest still runs it. It reports a failure as \"xfailed\", and that does not count against the run.</p>\n<p>What if the test passes? By default pytest only reports \"xpassed\". With <code>strict=True</code>, an unexpected pass makes the run fail. That forces a decision. If the bug is gone, someone must remove the marker on purpose. The pull request that fixes the bug then deletes the marker in its [[diff|diff]], and the same test must pass.</p>\n<p>A marker hides a failure, so it can hide the wrong failure too. A test may fail because of a <code>TypeError</code> in its own setup and never reach the check for the bug. Running pytest with <code>--runxfail</code> ignores the markers and prints each real failure, so you can check that every test fails because of its own bug.</p>",
+    "example": {
+      "title": "Marking a known bug",
+      "code": "import pytest\n\n@pytest.mark.xfail(strict=True, reason='a missing key renders as nothing')\ndef test_missing_key_is_marked():\n    assert fill_template('Total: {{total}}', store=FakeStore()) == 'Total: [missing: total]'",
+      "notes": [
+        "Load pytest.",
+        "",
+        "The marker. It says the test below is expected to fail because of a known bug, and strict=True makes a pass fail the run.",
+        "The test that shows the bug.",
+        "A tag for a missing key must show a visible marker. Until the fix, the code returns 'Total: ', so the test fails as the marker expects."
+      ]
+    }
+  },
+  "fixture": {
+    "id": "fixture",
+    "title": "Fixture and monkeypatch",
+    "level": 11,
+    "prereqs": [
+      "pytest"
+    ],
+    "short": "A ready-made helper that pytest hands to a test when the test names it as a parameter. monkeypatch is one of them.",
+    "body": "<p>Many tests need the same setup, such as a temporary folder, a database, or a changed setting. A <b>fixture</b> is pytest's way to provide it. You write the fixture's name as a [[parameter|parameter]] of the test function. pytest sees the name, creates the fixture, and passes it in. After the test, pytest runs the fixture's cleanup. You define your own with the <code>@pytest.fixture</code> [[decorator|decorator]], often in a shared file named <code>conftest.py</code>.</p>\n<p><code>monkeypatch</code> is a fixture built into pytest. It lets a test swap a value for the length of one test. <code>monkeypatch.setattr(obj, 'name', new_value)</code> replaces an [[attribute|attribute]] or a [[constant|constant]]. When the test ends, pytest puts the original back. Even if the test fails, the next test sees the real value.</p>\n<p>A common use is shrinking a limit. A real timeout of 300 seconds would make a test far too slow, so the test sets it to 0.3 seconds. <code>tmp_path</code>, another built-in fixture, gives each test a fresh empty folder.</p>",
+    "example": {
+      "title": "Shrinking a timeout for one test",
+      "code": "def test_stuck_job_times_out(monkeypatch, tmp_path):\n    monkeypatch.setattr(jobs, 'TIMEOUT_S', 0.3)\n    monkeypatch.setattr(jobs, 'MAX_WORKERS', 1)\n    log_file = tmp_path / 'run.log'\n    result = jobs.run_all([stuck_job, quick_job], log=log_file)\n    assert 'TimeoutError' in result[0]['error']",
+      "notes": [
+        "The parameter names ask pytest for two built-in fixtures.",
+        "For this test only, a job times out after 0.3 seconds instead of 300.",
+        "For this test only, the pool has 1 worker instead of 8.",
+        "A path inside a fresh folder that pytest deletes later.",
+        "Runs two jobs, one of which never finishes.",
+        "The stuck job is reported as timed out, in under a second."
+      ]
+    }
+  },
+  "regression": {
+    "id": "regression",
+    "title": "Regression",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "Something that used to work and breaks after a change. Tests that keep passing are the guard against it.",
+    "body": "<p>A <b>regression</b> is a step backwards. A feature worked yesterday, someone changed the code today, and now the feature is broken. Often the change was meant to fix something else. Regressions are common because code is connected in ways that are easy to miss.</p>\n<p>[[test|Tests]] are the main defense. Once a behavior has a test, any change that breaks it turns the test red before the change merges. A test written for this purpose is sometimes called a <b>guard</b>. It passes on the old code and must keep passing on the new code.</p>\n<p>A good fix thinks about what it might undo. Say an earlier change tuned a list view to show many short rows, and a new change wants to show long text in full. The simplest version gives every row's text the full space, so fewer rows fit, and no test notices that the earlier tuning is gone. A careful author adds a guard test that counts the rows. It passes before and after the real fix, and fails on the simple version.</p>\n<p>In review, ask what else depends on the changed code and whether a test covers it.</p>",
+    "example": {
+      "title": "A guard test",
+      "code": "def test_row_text_is_still_cut_at_80():\n    rows = [{'name': f'Document {i}', 'description': 'd' * 500} for i in range(5)]\n\n    summary = summarize(rows, budget=4000)\n\n    assert f'\"{\"d\" * 80}...\" (500 chars)' in summary\n    assert summary.count('row[') == 5",
+      "notes": [
+        "A guard test. It passes on the old code and on the new.",
+        "Five rows, each with a 500-character description.",
+        "",
+        "Builds the summary.",
+        "",
+        "Row text is still cut at 80 characters, with the full length reported.",
+        "All 5 rows are shown. If row text got the full budget, fewer rows would fit and this check would fail."
+      ]
+    }
+  },
+  "lint": {
+    "id": "lint",
+    "title": "Linter",
+    "level": 11,
+    "prereqs": [
+      "source-file"
+    ],
+    "short": "A tool that reads code without running it and flags style problems and simple mistakes. ruff and ESLint are linters.",
+    "body": "<p>A <b>linter</b> reads [[source-file|source files]] and reports problems without running the code. Some problems are real mistakes, such as a name used but never defined, or an import nobody uses. Others are about style, such as single versus double quotes, or a missing docstring. A team agrees on the rules once, and the linter applies them to everyone.</p>\n<p>Python projects often use ruff, flake8 or pylint, and JavaScript projects use ESLint. A <b>formatter</b>, such as ruff format, Black or Prettier, goes one step further and rewrites the layout of the code itself. Settings usually live in a file such as <code>pyproject.toml</code>.</p>\n<p>Linters run in two common places. A pre-commit hook runs them on the changed files before each [[commit|commit]], and [[ci|CI]] runs them on every pull request.</p>\n<p>A linter has limits. Most do not flag a [[parameter|parameter]] that nothing reads anymore, or a comment that no longer matches the code. A person has to catch those. A clean lint run means the code follows the rules, not that it works.</p>",
+    "example": {
+      "title": "What ruff prints for two common problems (illustrative)",
+      "code": "$ ruff check --output-format concise app/pricing.py\napp/pricing.py:3:20: F401 [*] `typing.Tuple` imported but unused\napp/pricing.py:12:9: F841 Local variable `total` is assigned to but never used\nFound 2 errors.\n[*] 1 fixable with the `--fix` option.\n$ ruff check --fix app/pricing.py\n$ ruff format --check app",
+      "notes": [
+        "Runs the linter on one file and asks for one line per problem.",
+        "File, line 3, column 20. Rule F401 found an import that is never used.",
+        "Line 12. Rule F841 found a variable that is set and never read.",
+        "The count of problems.",
+        "The [*] marks problems ruff can fix by itself.",
+        "Lets ruff fix what it can.",
+        "Checks that every file in the folder is already in ruff's layout, as CI often does."
+      ],
+      "lang": "hash"
+    }
+  },
+  "git": {
+    "id": "git",
+    "title": "git",
+    "level": 11,
+    "prereqs": [
+      "source-file"
+    ],
+    "short": "The tool that records versions of a project's files, so you can see every change, who made it, and go back.",
+    "body": "<p><b>git</b> is a version control system. It keeps the full history of a project's files in a hidden folder named <code>.git</code>, next to the files. Every saved version records which lines changed, who changed them, when, and why. You can compare any two versions, see who last touched a line, or bring back an old version. A folder that git tracks is called a <b>repository</b>, or repo.</p>\n<p>Programmers rely on git because code changes all the time, often by several people at once. Without it, nobody could answer \"what changed since this last worked?\" With it, that question is one command.</p>\n<p>The basic cycle is short. You edit [[source-file|files]]. <code>git status</code> lists what changed. <code>git add</code> picks the changes to save. <code>git commit</code> saves them as one [[commit|commit]] with a message. Commits form a history, and [[branch|branches]] let separate lines of work go on side by side. [[diff|Diffs]] show exactly what changed between two versions.</p>\n<p>Sites such as GitHub and GitLab host git repositories and add [[pull-request|pull requests]] on top. <code>git show branch:path</code> prints a file as it is on another branch without switching to it, which helps when reviewing.</p>",
+    "example": {
+      "title": "Looking at a project's history",
+      "code": "$ git status\n$ git log --oneline -3\n9f2c1e7 fix(cart): keep coupon when the cart is reloaded\n4b8a0d2 feat(cart): add coupons\n1c3e5f9 test(cart): cover an empty cart\n$ git blame -L 40,45 app/cart.py\n$ git show main:app/cart.py",
+      "notes": [
+        "Lists the files you changed and have not committed yet.",
+        "Shows the last 3 commits, one line each.",
+        "The newest commit. The code at the start is its short id.",
+        "The commit before it.",
+        "The one before that.",
+        "Shows who last changed lines 40 to 45 of a file, and in which commit.",
+        "Prints cart.py as it is on the main branch, without switching branches."
+      ],
+      "lang": "hash"
+    }
+  },
+  "commit": {
+    "id": "commit",
+    "title": "Commit",
+    "level": 11,
+    "prereqs": [
+      "git"
+    ],
+    "short": "One saved change to the project, with a message that says what changed and why, and an id like 9f2c1e7.",
+    "body": "<p>A <b>commit</b> is a snapshot of the project at one moment, saved with a message. It records the changes since the commit before it, the author, the time, and a link to that parent commit. The chain of parents is the history. Each commit gets a unique id, a [[hash|hash]] of its contents, usually shown short, as in <code>9f2c1e7</code>.</p>\n<p>Good commits are small and have one purpose, so they are easy to review and easy to undo. The message has a short first line, the subject, then a blank line and a body that explains why. Many projects follow a pattern called Conventional Commits, <code>type(scope): what changed</code>. <code>fix</code> marks a bug fix, <code>feat</code> a new feature and <code>test</code> new tests, and the scope names the part of the code.</p>\n<p>A good body says what was wrong, what changes, and what stays the same on purpose. It can also give evidence, such as a measurement before and after, and credit whoever found the problem.</p>",
+    "example": {
+      "title": "Making a commit and looking at one",
+      "code": "$ git add app/cart.py tests/test_cart.py\n$ git commit\n$ git show --stat 9f2c1e7\ncommit 9f2c1e7a4d0b6e2f8c1a3b5d7e9f0a2c4e6b8d1f\n    fix(cart): keep coupon when the cart is reloaded\n app/cart.py        | 12 ++++++++----\n tests/test_cart.py | 18 ++++++++++++++++++\n 2 files changed, 26 insertions(+), 4 deletions(-)",
+      "notes": [
+        "Stages two changed files, which picks what goes into the next commit.",
+        "Opens an editor for the message, then saves the commit.",
+        "Shows a commit and the files it changed.",
+        "The full id. Its first 7 characters are the short id.",
+        "The subject line of the message.",
+        "cart.py changed in 12 lines. The plus and minus marks show added and removed lines, drawn to scale.",
+        "The test file gained 18 lines.",
+        "The totals for both files."
+      ],
+      "lang": "hash"
+    }
+  },
+  "branch": {
+    "id": "branch",
+    "title": "Branch",
+    "level": 11,
+    "prereqs": [
+      "commit"
+    ],
+    "short": "A named line of commits, so work on one change stays separate until it is ready, like fix/cart-coupon.",
+    "body": "<p>A <b>branch</b> is a name that points at a [[commit|commit]]. When you commit on a branch, the name moves forward to the new commit. Each branch is its own line of work. You can switch between branches, and changes on one do not touch the others until you merge them.</p>\n<p>A project has a main branch, often named <code>main</code>, that holds the shared, accepted code. Some projects use <code>develop</code> for this. Work happens on separate branches started from it. When the work is done and reviewed, a [[pull-request|pull request]] merges it back.</p>\n<p>Branch names often follow a pattern that says what the branch is for, such as a type, a ticket number and a short description, as in <code>fix/SHOP-142-cart-coupon</code> or <code>feat/order-export</code>. When a branch falls behind main, the author either merges main into it or rebases it, which replays its commits on top of the newer main.</p>",
+    "example": {
+      "title": "Starting a branch from main",
+      "code": "$ git switch main\n$ git pull\n$ git switch -c fix/cart-coupon\n$ git add app/cart.py tests/test_cart.py\n$ git commit\n$ git push -u origin fix/cart-coupon",
+      "notes": [
+        "Moves to the main branch.",
+        "Downloads the newest commits from the shared repository.",
+        "Creates a new branch at this point and switches to it.",
+        "Stages the changed files.",
+        "Saves them as a commit on the new branch. main does not move.",
+        "Sends the branch to the shared repository, ready for a pull request."
+      ],
+      "lang": "hash"
+    }
+  },
+  "diff": {
+    "id": "diff",
+    "title": "Diff",
+    "level": 11,
+    "prereqs": [
+      "commit"
+    ],
+    "short": "A listing of the lines removed (-) and added (+) between two versions of a file. It is how code changes are read.",
+    "body": "<p>A <b>diff</b> shows what changed between two versions. Lines that start with <code>-</code> were removed. Lines that start with <code>+</code> were added. Lines that start with a space did not change. They are context, there to show where the change sits.</p>\n<p>Reading a diff starts with the headers.</p>\n<ul><li><code>--- a/path</code> is the old file, and <code>+++ b/path</code> is the new one.</li><li>A line like <code>@@ -40,5 +40,7 @@ def fill_template(</code> opens a <b>hunk</b>, one block of nearby changes. <code>-40,5</code> means that the block starts at line 40 of the old file and shows 5 of its lines. <code>+40,7</code> means the same block is 7 lines long in the new file. The text after the second <code>@@</code> names the function the change is in.</li></ul>\n<p>A changed line appears as a removal followed by an addition. To understand a diff, read the <code>-</code> lines as \"before\" and the <code>+</code> lines as \"after\", and ask what behavior differs. A diff shows only nearby lines, so open the whole file when the change depends on code further away.</p>",
+    "example": {
+      "title": "A hunk that replaces a silent blank with a marker",
+      "code": "--- a/app/templates.py\n+++ b/app/templates.py\n@@ -40,5 +40,7 @@ def fill_template(\n         value = store.get(key)\n         if value is None:\n-            return ''\n+            # Say what is missing instead of leaving a silent gap.\n+            log.debug('missing template key %r', key)\n+            return f'[missing: {key}]'\n         if fmt:\n             value = apply_format(value, fmt)",
+      "notes": [
+        "The old version of templates.py.",
+        "The new version.",
+        "A hunk inside fill_template, covering old lines 40 to 44 and new lines 40 to 46.",
+        "Context. Fetches the value for the tag's key.",
+        "Context. The key was not found.",
+        "Removed. The old code put empty text into the result.",
+        "Added. A comment that says why.",
+        "Added. Writes the missing key to the debug log.",
+        "Added. Puts a visible marker, such as [missing: total], into the result.",
+        "Context. The code after the change.",
+        "Context."
+      ],
+      "lang": "text"
+    }
+  },
+  "pull-request": {
+    "id": "pull-request",
+    "title": "Pull request (PR)",
+    "level": 11,
+    "prereqs": [
+      "branch"
+    ],
+    "short": "A request to merge a branch into the main branch. Others review the diff and automated checks run before it merges.",
+    "body": "<p>A <b>pull request</b>, or PR, is how a change gets into the shared code on sites such as GitHub. You push your [[branch|branch]] and open a PR that asks to merge it into a target branch, usually <code>main</code>. The PR page shows the [[diff|diff]], a title, and a description that explains the change. GitLab calls the same thing a merge request.</p>\n<p>The PR is where the checking happens before the merge.</p>\n<ul><li>People [[code-review|review]] the diff and leave comments on specific lines.</li><li>[[ci|CI]] runs the tests and checks and shows a pass or fail mark.</li><li>The author answers comments by pushing more commits to the same branch, and the PR updates by itself.</li></ul>\n<p>When reviewers approve and the checks pass, someone merges the PR. A PR can also be opened as a draft, which says \"look if you like, but this is not ready to merge\". A good description says what was wrong, how the author confirmed it, which tests prove the fix, what options were considered, and what was not verified.</p>",
+    "example": {
+      "title": "Opening a draft PR with the GitHub CLI",
+      "code": "$ git push -u origin fix/cart-coupon\n$ gh pr create --draft --base main --head fix/cart-coupon \\\n    --title \"fix(cart): keep coupon when the cart is reloaded\" \\\n    --body-file pr-body.md\n$ gh pr view --web\n$ gh pr ready",
+      "notes": [
+        "Sends the branch to GitHub.",
+        "Uses GitHub's command-line tool to open a draft PR. The base is the branch it will merge into.",
+        "The PR title, here the same as the commit subject.",
+        "The description, read from a file.",
+        "Opens the PR page in the browser.",
+        "Later, marks the draft as ready for review."
+      ],
+      "lang": "hash"
+    }
+  },
+  "stacked-prs": {
+    "id": "stacked-prs",
+    "title": "Stacked PRs",
+    "level": 11,
+    "prereqs": [
+      "pull-request"
+    ],
+    "short": "Pull requests built on top of each other, where each one contains the one before it. They merge in order.",
+    "body": "<p>Sometimes one change needs another change in place first. The second branch then starts from the first branch, not from <code>main</code>. Its [[pull-request|PR]] targets the first branch, so its diff shows only its own change. That chain is a <b>stack</b> of PRs. They merge from the bottom up. When the bottom PR merges, the next one is pointed at <code>main</code>, and so on.</p>\n<p>Stacking keeps each PR small and readable while the work builds up. The cost is waiting and upkeep. A change near the bottom forces every branch above it to be rebased, which means replaying its commits on top of the new version.</p>\n<p>Not every set of related PRs needs a stack. Changes that touch separate code can each sit directly on <code>main</code> and merge in any order. When you review a stacked PR, check its base branch, because the diff against <code>main</code> would include every PR below it. Each PR's own tests should fail on the branch below and pass on its own branch.</p>",
+    "example": {
+      "title": "A stack of three as git sees it",
+      "code": "$ git log --oneline main..feat/export-csv\nc41d9a2 feat(export): write orders as CSV\n7e0b3f5 refactor(export): split row building from writing\n2a9c6d1 fix(orders): keep the order date in UTC\n$ gh pr create --base refactor/export-rows --head feat/export-csv",
+      "notes": [
+        "Lists the commits on the top branch that main does not have yet.",
+        "The top of the stack.",
+        "The middle PR.",
+        "The bottom PR. Its parent is main.",
+        "Opens the top PR against the middle branch, so its diff shows only its own change."
+      ],
+      "lang": "hash"
+    }
+  },
+  "code-review": {
+    "id": "code-review",
+    "title": "Code review",
+    "level": 11,
+    "prereqs": [
+      "pull-request"
+    ],
+    "short": "Another person, or a tool, reading a change for problems before it merges, and leaving comments on the diff.",
+    "body": "<p><b>Code review</b> means someone other than the author reads the [[diff|diff]] of a [[pull-request|pull request]] before it merges. The reviewer looks for bugs, unclear code, missing tests, and changes that break something elsewhere. They leave comments on specific lines. The author answers, fixes or explains, and the reviewer approves once satisfied.</p>\n<p>Review works because the author is too close to the code. The author knows what the code is meant to do and reads that into it. A reviewer reads what it actually does.</p>\n<p>A useful habit is to check the claims. If the description says \"a stuck job no longer blocks the queue\", look for the test that proves it, and run it. Another is to trace an edge case by hand, such as an empty list, the 9th job when 8 workers are busy, or two requests at once.</p>\n<p>Many projects also run an automated reviewer, a bot that posts comments the way a person does. Its comments still need a human to judge them.</p>",
+    "example": {
+      "title": "Reviewing a PR from the command line",
+      "code": "$ gh pr checkout 1234\n$ gh pr diff 1234\n$ pytest tests/test_jobs.py\n$ gh pr review 1234 --comment \\\n    --body \"jobs.py: with 9 jobs and 8 workers, does the 9th job get its own 30 s?\"\n$ gh pr review 1234 --approve",
+      "notes": [
+        "Downloads the branch of PR 1234 and switches to it, to run it locally.",
+        "Prints the PR's diff to read.",
+        "Runs the tests that the PR claims prove the fix.",
+        "Leaves a review comment.",
+        "The question, about the per-job timeout.",
+        "Approves the PR once the questions are answered."
+      ],
+      "lang": "hash"
+    }
+  },
+  "ci": {
+    "id": "ci",
+    "title": "Continuous integration (CI)",
+    "level": 11,
+    "prereqs": [
+      "test"
+    ],
+    "short": "A server that builds the code and runs tests and checks on every pull request, before anything merges.",
+    "body": "<p><b>Continuous integration</b>, or CI, means a server builds and [[test|tests]] every change as soon as someone pushes it. No person has to start it. The result shows on the [[pull-request|pull request]] as a green check or a red cross, and a team usually blocks merging until CI is green.</p>\n<p>CI catches what a busy person skips. Nobody runs every test on every platform before every push, but a machine does it every time, the same way. It also checks the code in a clean setup, so problems that only appear outside the author's own computer show up.</p>\n<p>Common CI jobs run the [[lint|linter]], run the tests on several operating systems or language versions, build the program, and scan for secrets such as API keys committed by mistake. GitHub Actions keeps its setup in files under <code>.github/workflows/</code>. Other services, such as GitLab CI and CircleCI, work the same way.</p>\n<p>Green CI means the existing checks passed. It does not mean the change is tested. In review, check that the new tests run in CI and are not skipped.</p>",
+    "example": {
+      "title": "Part of a CI setup (GitHub Actions)",
+      "code": "on:\n  pull_request:\n    branches: [main]\njobs:\n  lint:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: pip install ruff\n      - run: ruff check\n      - run: ruff format --check",
+      "notes": [
+        "When the workflow runs.",
+        "On every pull request.",
+        "Into the main branch.",
+        "The jobs it runs. This excerpt shows one of them.",
+        "The job's id.",
+        "Runs on a fresh Linux machine from GitHub.",
+        "The steps, in order.",
+        "Fetches the code.",
+        "Installs the linter.",
+        "Runs the linter. Any error fails the job.",
+        "Fails if ruff would change the layout of any file."
+      ],
+      "lang": "hash"
+    }
+  }
+}
