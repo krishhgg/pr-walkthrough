@@ -31,7 +31,9 @@ python3 scripts/collect.py --branch feature-x    # a local branch, no PR needed 
 ```
 
 "All the PRs you made" means the PRs created in this session (you know their numbers or URLs), or,
-if the user means their own, `--mine`. Collect a set in one call so stacks are found.
+if the user means their own, `--mine`. Collect a set in one call so stacks are found. When you collect
+one PR of a stack whose other PRs were collected before, `collect.py` finds them in the same folder,
+refreshes them too and marks them `added_as_parent`; carry their notes as well if they moved.
 
 It prints a JSON summary: each target's folder (default `~/.cache/pr-walkthrough/<owner>__<repo>/pr-<n>/`,
 override with `--out` or `$PR_WALKTHROUGH_HOME`), its size, its stack parent, and `previous_head` when an

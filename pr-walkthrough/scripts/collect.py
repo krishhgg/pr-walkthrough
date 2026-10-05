@@ -270,6 +270,32 @@ def find_stack_parents(items: list, clone: str | None, context: int) -> None:
             m['diff_scope'] = 'own commits (the parent PR is reviewed on its own page)'
 
 
+def earlier_parents(items: list, out: Path) -> list:
+    """Targets for open PRs collected before into the same folder that a PR in this batch is built on.
+
+    A stacked PR collected on its own would otherwise be diffed against its base branch and show
+    its parents' commits as its own. Each earlier PR is checked against GitHub as it is now, since
+    a parent may have been rebased since it was collected.
+    """
+    have = {(it['meta']['repo'], it['meta'].get('number')) for it in items if it['meta']['kind'] == 'pr'}
+    found = []
+    for it in [i for i in items if i['meta']['kind'] == 'pr']:
+        m = it['meta']
+        mine = [c['oid'] for c in m['commits']]
+        for meta_path in sorted((out / m['repo'].replace('/', '__')).glob('pr-*/meta.json')):
+            n = int(meta_path.parent.name[3:])
+            if (m['repo'], n) in have:
+                continue
+            now = json.loads(sh('gh', 'pr', 'view', str(n), '-R', m['repo'], '--json', 'commits,headRefName,state', check=False) or '{}')
+            if now.get('state') != 'OPEN':
+                continue
+            theirs = [c['oid'] for c in now.get('commits', [])]
+            if m['baseRefName'] == now.get('headRefName') or (theirs and len(theirs) < len(mine) and mine[: len(theirs)] == theirs):
+                found.append({'kind': 'pr', 'repo': m['repo'], 'number': n})
+                have.add((m['repo'], n))
+    return found
+
+
 # ------------------------------------------------------------------ whole files
 
 MAX_FILE_CHARS = 400_000  # larger files are left out of the code pane; the diff still covers them
@@ -365,11 +391,16 @@ def main() -> None:
             ap.error('nothing to collect: give PR numbers or URLs, --mine, or --branch')
         items = [collect_pr(t, clone, args.context) if t['kind'] == 'pr' else collect_branch(t, clone, args.context)
                  for t in targets]
+        out = Path(args.out).expanduser()
+        parents = earlier_parents(items, out)
+        items += [collect_pr(t, clone, args.context) for t in parents]
         for it in items:
             it['clone'] = clone
         find_stack_parents(items, clone, args.context)
-        out = Path(args.out).expanduser()
         summary = [write(it, out) for it in items]
+        for row, it in zip(summary, items):
+            if any(t['number'] == it['meta'].get('number') and t['repo'] == it['meta']['repo'] for t in parents):
+                row['added_as_parent'] = 'collected before; refreshed because a PR in this batch is built on it'
     except CollectError as exc:
         sys.exit(f'collect: {exc}')
     print(json.dumps({'out': str(Path(args.out).expanduser()), 'targets': summary}, indent=1))
