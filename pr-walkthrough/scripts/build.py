@@ -30,6 +30,9 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
 LINK = re.compile(r'\[\[([a-z0-9-]+)\|([^\]]+)\]\]')
+CODE_LINK = re.compile(r'\[\[([^\[\]|:]+?):(\d+)(?:-(\d+))?\|([^\]]+)\]\]')
+CODE_REF = re.compile(r'^([^:]+):(\d+)(?:-(\d+))?$')
+MIN_COVERAGE = 0.9  # share of meaningful added lines in a source file that need an explanatory comment
 BAD_CHARS = ('—', '–')  # em dash, en dash
 RISKS = ('low', 'medium', 'high')
 SOURCES = ('author-notes', 'pr-text', 'inferred')
@@ -37,7 +40,7 @@ REQUIRED = ['summary', 'before_after', 'problem', 'thinking', 'files', 'tests', 
 MAX_MINUTES = 10.0
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from measure import estimate  # noqa: E402
+from measure import estimate, secondary  # noqa: E402
 
 
 class BuildError(Exception):
@@ -66,14 +69,19 @@ def walk_strings(obj, fn, path='$'):
     return obj
 
 
-def check_text(where: str, lessons: dict, obj, errors: list) -> set:
-    """Report dash characters and unknown lesson links; return the lesson ids linked."""
+def check_text(where: str, lessons: dict, obj, errors: list, lengths: dict | None = None) -> set:
+    """Report dash characters, unknown lesson links and code links that miss; return the lesson ids linked."""
     used = set()
 
     def fn(path, s):
         for ch in BAD_CHARS:
             if ch in s:
                 errors.append(f'{where} {path}: contains a dash character {ch!r}; use a comma, a period or parentheses')
+        if lengths is not None:
+            for m in CODE_LINK.finditer(s):
+                problem = ref_problem(m.group(1), int(m.group(2)), int(m.group(3) or m.group(2)), lengths)
+                if problem:
+                    errors.append(f'{where} {path}: code link [[{m.group(1)}:{m.group(2)}...]] {problem}')
         for m in LINK.finditer(s):
             if m.group(1) in lessons:
                 used.add(m.group(1))
@@ -86,7 +94,107 @@ def check_text(where: str, lessons: dict, obj, errors: list) -> set:
 
 
 def render_links(obj):
-    return walk_strings(obj, lambda _p, s: LINK.sub(lambda m: f'<a class="c" data-c="{m.group(1)}">{m.group(2)}</a>', s))
+    def fn(_p, s):
+        s = CODE_LINK.sub(lambda m: f'<a class="cl" data-file="{html.escape(m.group(1).strip(), quote=True)}" data-a="{m.group(2)}" '
+                                    f'data-b="{m.group(3) or m.group(2)}">{m.group(4)}</a>', s)
+        return LINK.sub(lambda m: f'<a class="c" data-c="{m.group(1)}">{m.group(2)}</a>', s)
+
+    return walk_strings(obj, fn)
+
+
+# ---------------------------------------------------------------- code links and explanatory comments
+
+
+def file_lengths(diff: dict) -> dict:
+    """Line counts of every changed file whose whole text the page can show."""
+    return {f['path']: len(f['head_text'].splitlines()) for f in diff['files'] if f.get('head_text') is not None}
+
+
+def ref_problem(path: str, a: int, b: int, lengths: dict) -> str:
+    path = path.strip()
+    if path not in lengths:
+        return f'names {path!r}, which is not a changed file the page can show'
+    if not (1 <= a <= b <= lengths[path]):
+        return f'asks for lines {a}-{b}, but {path} has {lengths[path]} lines'
+    return ''
+
+
+def check_code_refs(tid: str, content: dict, lengths: dict) -> list:
+    """Every "code" field (a section, step, option or risk that opens code when clicked) must point at real lines."""
+    errors = []
+
+    def walk(o, where):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k == 'code' and isinstance(v, str):
+                    m = CODE_REF.match(v.strip())
+                    problem = 'is not "path:line" or "path:first-last"' if not m else ref_problem(m.group(1), int(m.group(2)), int(m.group(3) or m.group(2)), lengths)
+                    if problem:
+                        errors.append(f'{tid} {where}.code {v!r}: {problem}')
+                elif k != 'files':
+                    walk(v, f'{where}.{k}')
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk(v, f'{where}[{i}]')
+
+    walk(content, '$')
+    for k, v in (content.get('code_refs') or {}).items():
+        m = CODE_REF.match(str(v).strip())
+        problem = 'is not "path:line" or "path:first-last"' if not m else ref_problem(m.group(1), int(m.group(2)), int(m.group(3) or m.group(2)), lengths)
+        if problem:
+            errors.append(f'{tid} code_refs.{k} {v!r}: {problem}')
+    return errors
+
+
+def trivial_lines(text: str) -> set:
+    """Line numbers that need no comment of their own: blanks, comments, docstrings, lone brackets."""
+    out, in_doc = set(), False
+    for n, line in enumerate(text.splitlines(), 1):
+        st = line.strip()
+        quotes = st.count('\"\"\"') + st.count("\'\'\'")
+        if in_doc or quotes:
+            out.add(n)
+            if quotes % 2:
+                in_doc = not in_doc
+            continue
+        if not st or st.startswith(('#', '//', '/*', '*', '<!--')) or re.fullmatch(r'[\)\]\}\(\[\{,;:]+', st):
+            out.add(n)
+    return out
+
+
+def check_annotations(tid: str, content: dict, diff: dict, lengths: dict) -> tuple[list, list]:
+    """Explanatory comments must sit on real lines, and cover the added code of every source file."""
+    errors, warnings = [], []
+    by_path = {f['path']: f for f in diff['files']}
+    for f in content.get('files', []):
+        fd = by_path.get(f['path'])
+        anns = f.get('annotations') or []
+        covered = set()
+        for i, an in enumerate(anns):
+            rng = an.get('lines') or ([an['line'], an['line']] if an.get('line') else None)
+            if not rng or not an.get('text', '').strip():
+                errors.append(f'{tid} {f["path"]} annotations[{i}]: needs "line" (or "lines": [first, last]) and "text"')
+                continue
+            problem = ref_problem(f['path'], rng[0], rng[1], lengths)
+            if problem:
+                errors.append(f'{tid} {f["path"]} annotations[{i}]: {problem}')
+                continue
+            covered.update(range(rng[0], rng[1] + 1))
+        if fd is None or fd.get('head_text') is None:
+            continue
+        skip = trivial_lines(fd['head_text'])
+        added = sorted({ln['new'] for h in fd['hunks'] for ln in h['lines'] if ln['t'] == 'add'} - skip)
+        if not added:
+            continue
+        missing = [n for n in added if n not in covered]
+        share = 1 - len(missing) / len(added)
+        if secondary(f['path']):
+            if not anns:
+                warnings.append(f'{tid} {f["path"]}: no explanatory comments; a short one per test or block helps the reader')
+        elif share < MIN_COVERAGE:
+            errors.append(f'{tid} {f["path"]}: explanatory comments cover {share:.0%} of its added lines (need {MIN_COVERAGE:.0%}); '
+                          f'uncovered lines include {missing[:10]}')
+    return errors, warnings
 
 
 # ---------------------------------------------------------------- lessons
@@ -273,7 +381,8 @@ def build_target(target: Path, lessons: dict, levels: dict, siblings: list, writ
     content = load_json(target / 'content.json')
     tid = target.name
     errors = [f'{tid}: missing key {k}' for k in REQUIRED if k not in content]
-    used = check_text(tid, lessons, content, errors)
+    lengths = file_lengths(diff)
+    used = check_text(tid, lessons, content, errors, lengths)
     for cid in content.get('concepts', []):
         if cid not in lessons:
             errors.append(f'{tid}: unknown lesson {cid} in concepts')
@@ -282,12 +391,15 @@ def build_target(target: Path, lessons: dict, levels: dict, siblings: list, writ
             errors.append(f'{tid}: unknown lesson {cid} in concept_hooks')
     errors += check_coverage(tid, content, diff)
     errors += check_review(tid, content, diff)
+    errors += check_code_refs(tid, content, lengths)
+    ann_errors, ann_warnings = check_annotations(tid, content, diff, lengths)
+    errors += ann_errors
     info = pr_info(meta, target)
     words, code, minutes, _ = estimate(content, diff)
     info.update({'files': len(diff['files']), 'added': sum(f['added'] for f in diff['files']),
                  'deleted': sum(f['deleted'] for f in diff['files']), 'minutes': round(minutes),
                  'short': first_sentence(content.get('summary', '')), 'built': not errors})
-    warnings = []
+    warnings = list(ann_warnings)
     if minutes > MAX_MINUTES:
         warnings.append(f'{tid}: about {minutes} minutes to read (target {MAX_MINUTES:g}); fold supporting chunks and cut prose')
     if errors or not write:

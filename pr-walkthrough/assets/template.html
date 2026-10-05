@@ -180,6 +180,63 @@ table.t1 td.num, table.t1 th.num { text-align: right; font-variant-numeric: tabu
 ol.lookfirst li { margin: 6px 0; }
 table.cmap tr.grp td { font-weight: 700; background: var(--panel-2); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
 .nowrap { white-space: nowrap; }
+/* split view: text on the left, the PR's code in an editor on the right */
+#codepane, #codetoggle { display: none; }
+body.with-code .layout { grid-template-columns: 210px minmax(0, 46fr) minmax(0, 54fr); }
+body.with-code main { max-width: none; padding: 26px 32px 140px; }
+body.with-code #codepane { display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; border-left: 1px solid var(--line); background: #fff; min-width: 0; }
+.cp-tabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--line); background: var(--panel-2); flex: none; scrollbar-width: thin; }
+.cp-tab { font: 12.5px var(--sans); border: 0; border-right: 1px solid var(--line); background: transparent; padding: 8px 12px; cursor: pointer; white-space: nowrap; display: flex; gap: 8px; align-items: center; color: var(--ink-2); }
+.cp-tab:hover { background: #fff; }
+.cp-tab.on { background: #fff; color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--blue); }
+.cp-tab .ct { font-size: 11px; font-weight: 400; }
+.cp-tab.new .nm::before { content: "new "; color: var(--green); font-size: 10.5px; font-weight: 700; }
+.cp-tab.del .nm { text-decoration: line-through; }
+.cp-bar { flex: none; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 5px 12px; font-size: 12px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+.cp-bar code { background: none; padding: 0; color: var(--ink-2); }
+.cp-legend { display: flex; gap: 10px; margin-left: auto; }
+.cp-legend .lg::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.cp-legend .add::before { background: rgba(46, 160, 67, .35); } .cp-legend .del::before { background: rgba(248, 81, 73, .35); } .cp-legend .ann::before { background: #e7f3e3; border: 1px solid #b7d9ad; }
+.cp-body { flex: 1; min-height: 0; position: relative; }
+.cp-body.flash::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px #e3b341; animation: cpflash 1.2s ease-out forwards; }
+@keyframes cpflash { to { box-shadow: inset 0 0 0 2px transparent; } }
+.mo-add-line { background: rgba(46, 160, 67, .13); }
+.mo-add-gutter { border-left: 3px solid #2ea043; margin-left: 4px; }
+.mo-del-line { background: rgba(248, 81, 73, .12); }
+.mo-del-gutter { border-left: 3px solid #cf222e; margin-left: 4px; }
+.mo-focus-line { background: rgba(227, 179, 65, .30) !important; }
+.mo-focus-gutter { border-left: 3px solid #d4a72c; margin-left: 4px; }
+.mo-ann { font: italic 13px/20px var(--mono); color: #2f6f2f; white-space: pre-wrap; background: #f3faf0; border-top: 1px dashed #cfe6c6; padding-top: 2px; overflow: hidden; }
+.mo-ann a.c { color: #1f5f1f; }
+.mo-ann-mark { color: #6a9a5f; font-style: normal; }
+.mo-removed { background: #fff0ef; font: 13px/20px var(--mono); color: #82292a; overflow: hidden; }
+.mo-rm-line { white-space: pre; padding-left: 4px; }
+.mo-rm-sign { color: #c93a39; margin-right: 6px; font-weight: 700; }
+.fv { font: 13px/20px var(--mono); overflow: auto; height: 100%; }
+.fv .r { display: flex; white-space: pre; min-width: max-content; }
+.fv .n { width: 56px; flex: none; text-align: right; padding-right: 14px; color: #9a988f; user-select: none; }
+.fv .t { padding-right: 24px; }
+.fv .r.add { background: rgba(46, 160, 67, .13); } .fv .r.del, .fv .r.rm { background: rgba(248, 81, 73, .12); color: #82292a; }
+.fv .r.ann .t { font-style: italic; color: #2f6f2f; white-space: pre-wrap; background: #f3faf0; }
+.fv .r.focus { background: rgba(227, 179, 65, .30); }
+a.cl { color: inherit; text-decoration: underline dotted #d4a72c; text-decoration-thickness: 2px; text-underline-offset: 3px; cursor: pointer; background: #fff8e1; border-radius: 3px; padding: 0 2px; }
+a.cl:hover { background: #ffeeb8; }
+.codehead, .codeitem, .lookitem, .filehead[data-file], .ccard { cursor: pointer; }
+.codeicon { font: 600 11.5px var(--sans); color: var(--blue-ink); background: var(--blue-wash); border-radius: 999px; padding: 1px 8px; margin-left: 10px; vertical-align: 3px; white-space: nowrap; }
+.codehead:hover .codeicon, .codeitem:hover .codeicon, .filehead:hover .codeicon { background: var(--blue); color: #fff; }
+.codeitem:hover, .lookitem:hover { background: #fffbea; border-radius: 6px; }
+.ccard { border: 1px solid var(--line); border-radius: 9px; background: #fff; padding: 10px 14px; margin: 8px 0; }
+.ccard:hover { border-color: #d4a72c; box-shadow: 0 1px 6px rgba(0, 0, 0, .06); }
+.ccard.minor { background: var(--panel-2); }
+.ccard.updated { box-shadow: inset 4px 0 0 #2a78d6; }
+.ccard .where { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.filehead[data-file]:hover h3 { color: var(--blue-ink); }
+@media (max-width: 1150px) {
+  body.with-code .layout { grid-template-columns: 200px minmax(0, 1fr); }
+  body.with-code #codepane { display: none; }
+  body.with-code.code-open #codepane { display: flex; position: fixed; inset: 0 0 0 auto; width: min(100vw, 900px); z-index: 40; box-shadow: -8px 0 24px rgba(0, 0, 0, .15); }
+  body.with-code #codetoggle { display: block; position: fixed; right: 16px; bottom: 16px; z-index: 41; }
+}
 </style>
 </head>
 <body>
@@ -188,7 +245,9 @@ table.cmap tr.grp td { font-weight: 700; background: var(--panel-2); font-size: 
 <div class="layout">
   <nav id="toc"></nav>
   <main id="main"></main>
+  <aside id="codepane" aria-label="The PR's code"><div class="cp-tabs" id="cptabs"></div><div class="cp-bar" id="cpbar"></div><div class="cp-body" id="cpbody"></div></aside>
 </div>
+<button class="btn" id="codetoggle" onclick="document.body.classList.toggle('code-open')">Show or hide the code</button>
 <script type="application/json" id="data">{{DATA}}</script>
 <script>
 {{APP}}

@@ -38,6 +38,13 @@ It is what a reviewer reads first, and choosing it forces you to find the risky 
 - `thinking`: what was noticed, how it was confirmed, the options weighed and why one won.
 - `files`: every changed file, main logic first. Group lines into chunks by idea. Fold supporting
   chunks. One chunk per test function, saying what it proves.
+- `annotations` per file: the line-by-line comments shown in the editor. Write them while reading
+  the head version of each file top to bottom, one per step of the logic: what the lines do, why
+  this construct (a loop, a lock, a try block, an early return) and what it achieves. This is where a
+  reader solidifies their understanding by seeing the real code, so keep each one concrete and short.
+- Link the text to the code: put `[[path:first-last|...]]` on the phrases that name code, set
+  `code_refs` for the sections that discuss a specific place, and `code` on thinking steps and risks
+  that point at code. A reader should be able to click from any claim to the lines behind it.
 - `concepts`: the lessons the code needs (the builder adds prerequisites). `concept_hooks` may say,
   in one sentence each, where a lesson's idea shows up in this PR; the lesson panel shows it.
 - If a lesson the page needs does not exist, add it to `<repo-folder>/lessons.json` in the same shape

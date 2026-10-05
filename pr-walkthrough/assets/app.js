@@ -296,36 +296,35 @@ function githubLink(path, lines, from, to) {
   return '';
 }
 
+// The left side lists each change as a card; clicking a card opens its lines in the code pane.
+function chunkRef(f, ch, lines, from, to) {
+  if (ch.new) return {path: f.path, a: ch.new[0], b: ch.new[1]};
+  const firstNew = lines.slice(from, to + 1).find((l) => l.new != null);
+  if (firstNew) return {path: f.path, a: firstNew.new, b: firstNew.new};
+  const cf = CP.byPath[f.path];
+  const at = cf && ch.old ? anchorForOld(cf, ch.old[0]) : 1;
+  return {path: f.path, a: at, b: at};
+}
 function renderFile(f, fd, fi) {
   const lines = flatten(fd);
-  const lang = langOf(f.path);
-  const hl = highlight(lines.map((l) => l.text), lang);
   const changed = new Set(((D.changed || {}).chunks || {})[f.path] || []);
-  const spans = (f.chunks || []).map((ch, ci) => {
+  const cards = (f.chunks || []).map((ch, ci) => {
     const idx = chunkIdx(ch, lines);
     return {ci, from: Math.min(...idx), to: Math.max(...idx), ch};
-  }).sort((a, b) => a.from - b.from);
-  // Unchanged context and supporting chunks start folded: the notes carry the reading, the code opens on request.
-  const plain = (from, to) => `<div class="crow plain"><details class="ctx"><summary>${to - from + 1} unchanged line${to > from ? 's' : ''}</summary><div class="src">${codeLines(lines, hl, from, to)}</div></details><div class="note"></div></div>`;
-  let rows = '', i = 0;
-  for (const s of spans) {
-    if (i < s.from) rows += plain(i, s.from - 1);
-    const src = `<div class="src">${codeLines(lines, hl, s.from, s.to)}</div>`;
+  }).sort((a, b) => a.from - b.from).map((s) => {
     const kind = chunkKind(lines, s.from, s.to);
     const gh = githubLink(f.path, lines, s.from, s.to);
-    const meta = `<div class="cmeta"><span class="kind ${kind}">${kind}</span>${riskPill(s.ch.risk)}${changed.has(s.ci) ? '<span class="pill blue">updated since you last read</span>' : ''}${gh ? `<a class="ghlink" href="${gh}" target="_blank" rel="noopener">Comment on GitHub</a>` : ''}</div>`;
-    const note = `${meta}${s.ch.html}${s.ch.check ? `<div class="check"><b>Check:</b> ${s.ch.check}</div>` : ''}`;
-    rows += s.ch.fold
-      ? `<div class="crow${changed.has(s.ci) ? ' updated' : ''}" id="${chunkId(fi, s.ci)}"><details class="ctx"><summary>Show ${s.to - s.from + 1} lines</summary>${src}</details><div class="note">${note}</div></div>`
-      : `<div class="crow${changed.has(s.ci) ? ' updated' : ''}" id="${chunkId(fi, s.ci)}">${src}<div class="note">${note}</div></div>`;
-    i = s.to + 1;
-  }
-  if (i < lines.length) rows += plain(i, lines.length - 1);
+    const ref = chunkRef(f, s.ch, lines, s.from, s.to);
+    const where = s.ch.new ? `lines ${s.ch.new[0]}${s.ch.new[1] !== s.ch.new[0] ? '-' + s.ch.new[1] : ''}` : `removed lines ${s.ch.old[0]}${s.ch.old[1] !== s.ch.old[0] ? '-' + s.ch.old[1] : ''}`;
+    return `<div class="ccard${changed.has(s.ci) ? ' updated' : ''}${s.ch.fold ? ' minor' : ''}" id="${chunkId(fi, s.ci)}"${codeAttrs(ref)}>
+      <div class="cmeta"><span class="kind ${kind}">${kind}</span><span class="where">${where}</span>${riskPill(s.ch.risk)}${changed.has(s.ci) ? '<span class="pill blue">updated since you last read</span>' : ''}${gh ? `<a class="ghlink" href="${gh}" target="_blank" rel="noopener">Comment on GitHub</a>` : ''}</div>
+      ${s.ch.html}${s.ch.check ? `<div class="check"><b>Check:</b> ${s.ch.check}</div>` : ''}</div>`;
+  }).join('');
   const status = {added: '<span class="pill green">new file</span>', deleted: '<span class="pill red">deleted</span>', renamed: '<span class="pill">renamed</span>'}[fd.status] || '';
   const body = isSecondary(f.path)
-    ? `<details class="filefold"><summary>Show the ${fd.added + fd.deleted} changed lines, with notes</summary><div class="code-rows">${rows}</div></details>`
-    : `<div class="code-rows">${rows}</div>`;
-  return `<div class="filehead" id="${fileId(f.path)}"><h3>${esc(f.path)}</h3>${status}<span class="pill green">+${fd.added}</span><span class="pill red">−${fd.deleted}</span></div>
+    ? `<details class="filefold"><summary>Show the ${(f.chunks || []).length} notes for this file</summary>${cards}</details>`
+    : cards;
+  return `<div class="filehead" id="${fileId(f.path)}" data-file="${esc(f.path)}"><h3>${esc(f.path)}</h3>${status}<span class="pill green">+${fd.added}</span><span class="pill red">−${fd.deleted}</span><span class="codeicon">open in the editor</span></div>
     <div>${f.role || ''}</div>${body}`;
 }
 
@@ -352,6 +351,12 @@ function readingMinutes(root) {
     for (const c of el.childNodes) { if (c.nodeType === 3) words += c.textContent.split(/\s+/).filter(Boolean).length; else if (c.nodeType === 1) walk(c); }
   };
   walk(root);
+  if (D.kind === 'pr') {
+    for (const f of D.content.files) {
+      if (isSecondary(f.path)) continue;
+      for (const ch of f.chunks || []) if (!ch.fold) for (const side of ['new', 'old']) if (ch[side]) codeLines += ch[side][1] - ch[side][0] + 1;
+    }
+  }
   return {minutes: Math.max(1, Math.round(words / 200 + codeLines / 60 + diagrams / 2)), words, codeLines, diagrams};
 }
 
@@ -396,7 +401,9 @@ function renderReviewGuide(K, byPath) {
     const at = findChunk(K, it);
     const href = at ? (at.ci == null ? `#${fileId(it.path)}` : `#${chunkId(at.fi, at.ci)}`) : '#';
     const line = (it.new || it.old || [])[0];
-    return `<li><a href="${href}"><code>${esc(it.path.split('/').pop())}${line ? ':' + line : ''}</code></a> ${riskPill(it.risk)} ${it.why}</li>`;
+    const cf = CP.byPath[it.path];
+    const ref = it.new ? {path: it.path, a: it.new[0], b: it.new[1]} : {path: it.path, a: cf ? anchorForOld(cf, it.old[0]) : 1, b: cf ? anchorForOld(cf, it.old[0]) : 1};
+    return `<li class="lookitem"${codeAttrs(ref)}><a href="${href}" data-noscroll="1"><code>${esc(it.path.split('/').pop())}${line ? ':' + line : ''}</code></a> ${riskPill(it.risk)} ${it.why}</li>`;
   }).join('');
   const ch = D.changed;
   let changed = '';
@@ -411,6 +418,228 @@ function renderReviewGuide(K, byPath) {
     <h3>Change map</h3><table class="t1 cmap">${map}</table>
     ${P.diff_scope ? `<p class="mute" style="font-size:13px">This page covers ${esc(P.diff_scope)}.</p>` : ''}</section>`;
 }
+
+// ------------------------------------------------------------ code pane: the PR's files in a VS Code editor
+// Monaco (the editor inside VS Code) loads from a CDN; without it a plain viewer shows the same things.
+// Explanatory comments and removed lines are drawn between the real lines, so line numbers stay
+// the file's own and match GitHub; nothing here is part of the PR.
+const MONACO = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min';
+const MONACO_LANG = {py: 'python', js: 'javascript', mjs: 'javascript', cjs: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
+  json: 'json', md: 'markdown', go: 'go', rs: 'rust', java: 'java', kt: 'kotlin', rb: 'ruby', sh: 'shell', bash: 'shell', zsh: 'shell',
+  yml: 'yaml', yaml: 'yaml', toml: 'ini', ini: 'ini', cfg: 'ini', css: 'css', scss: 'scss', html: 'html', xml: 'xml', sql: 'sql',
+  c: 'c', h: 'c', cc: 'cpp', cpp: 'cpp', hpp: 'cpp', cs: 'csharp', swift: 'swift', php: 'php', txt: 'plaintext'};
+function monacoLang(path) {
+  const name = path.split('/').pop();
+  if (/^Dockerfile/.test(name)) return 'dockerfile';
+  return MONACO_LANG[((name.match(/\.([a-z0-9]+)$/i) || [])[1] || '').toLowerCase()] || 'plaintext';
+}
+function commentMark(path) {
+  const l = monacoLang(path);
+  return ['python', 'shell', 'yaml', 'ini', 'ruby', 'dockerfile'].includes(l) ? '#' : l === 'sql' ? '--' : '//';
+}
+function parseRef(ref) {
+  const m = String(ref || '').trim().match(/^([^:]+):(\d+)(?:-(\d+))?$/);
+  return m ? {path: m[1], a: +m[2], b: +(m[3] || m[2])} : null;
+}
+function codeAttrs(ref) {
+  const r = typeof ref === 'string' ? parseRef(ref) : ref;
+  return r ? ` data-file="${esc(r.path)}" data-a="${r.a}" data-b="${r.b}"` : '';
+}
+
+const CP = {files: [], byPath: {}, current: null, editor: null, monaco: null, zones: [], decos: [], focusDecos: [], fallback: false, views: {}};
+
+function buildCodeFiles() {
+  const K = D.content, byPath = Object.fromEntries(D.diff.files.map((f) => [f.path, f]));
+  CP.files = K.files.filter((kf) => byPath[kf.path]).map((kf) => {
+    const fd = byPath[kf.path];
+    const added = new Set(), removed = [];
+    fd.hunks.forEach((h) => {
+      // A removed run sits after the last line before it on the new side.
+      let lastNew = (h.lines.find((l) => l.new != null) || {new: 1}).new - 1, run = null;
+      h.lines.forEach((l) => {
+        if (l.t === 'add') added.add(l.new);
+        if (l.t === 'del') {
+          if (!run) { run = {after: lastNew, lines: [], olds: []}; removed.push(run); }
+          run.lines.push(l.text); run.olds.push(l.old);
+        } else { run = null; if (l.new != null) lastNew = l.new; }
+      });
+    });
+    const text = fd.head_text != null ? fd.head_text : (fd.base_text != null ? fd.base_text : null);
+    return {path: kf.path, fd, kf, text, deleted: fd.status === 'deleted', added, removed: fd.status === 'deleted' ? [] : removed,
+      anns: (kf.annotations || []).map((an) => ({first: an.lines ? an.lines[0] : an.line, last: an.lines ? an.lines[1] : an.line, html: an.text}))};
+  });
+  CP.byPath = Object.fromEntries(CP.files.map((f) => [f.path, f]));
+}
+// Where a removed line shows: the new-side line its red block sits after (0 means the top).
+function anchorForOld(f, oldLine) {
+  const run = f.removed.find((r) => r.olds.includes(oldLine));
+  return run ? Math.max(1, run.after) : 1;
+}
+
+function renderTabs() {
+  $('#cptabs').innerHTML = CP.files.map((f) => `<button class="cp-tab${f.path === CP.current ? ' on' : ''}${f.deleted ? ' del' : f.fd.status === 'added' ? ' new' : ''}" data-tab="${esc(f.path)}" title="${esc(f.path)}"><span class="nm">${esc(f.path.split('/').pop())}</span><span class="ct"><span class="ok">+${f.fd.added}</span> <span class="bad">−${f.fd.deleted}</span></span></button>`).join('');
+  const on = $('#cptabs .cp-tab.on');
+  if (on) on.scrollIntoView({block: 'nearest', inline: 'nearest'});
+}
+function renderBar(f) {
+  const anchor = (D.gh_anchor || {})[f.path];
+  $('#cpbar').innerHTML = `<code class="cp-path">${esc(f.path)}</code><span class="cp-legend"><span class="lg add">added</span><span class="lg del">removed</span><span class="lg ann">${esc(commentMark(f.path))} explanation, not in the PR</span></span>${P.url && anchor ? `<a href="${P.url}/files#diff-${anchor}" target="_blank" rel="noopener">GitHub</a>` : ''}`;
+}
+
+function loadMonaco() {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), 9000);
+    const s = document.createElement('script');
+    s.src = MONACO + '/vs/loader.js';
+    s.onload = () => {
+      window.MonacoEnvironment = {getWorkerUrl: () => 'data:text/javascript;charset=utf-8,' + encodeURIComponent(
+        `self.MonacoEnvironment={baseUrl:'${MONACO}/'};importScripts('${MONACO}/vs/base/worker/workerMain.js');`)};
+      window.require.config({paths: {vs: MONACO + '/vs'}});
+      window.require(['vs/editor/editor.main'], () => { clearTimeout(timer); resolve(window.monaco); }, (e) => { clearTimeout(timer); reject(e); });
+    };
+    s.onerror = () => { clearTimeout(timer); reject(new Error('could not load the editor')); };
+    document.head.appendChild(s);
+  });
+}
+
+function applyDecorations(f) {
+  const m = CP.monaco, d = [];
+  if (f.deleted) {
+    d.push({range: new m.Range(1, 1, f.model.getLineCount(), 1), options: {isWholeLine: true, className: 'mo-del-line', linesDecorationsClassName: 'mo-del-gutter'}});
+  }
+  for (const n of f.added) {
+    d.push({range: new m.Range(n, 1, n, 1), options: {isWholeLine: true, className: 'mo-add-line', linesDecorationsClassName: 'mo-add-gutter',
+      minimap: {color: '#3fb950', position: 1}, overviewRuler: {color: '#3fb950', position: 1}}});
+  }
+  CP.decos = CP.editor.deltaDecorations(CP.decos, d);
+}
+function applyZones(f) {
+  const ed = CP.editor, m = CP.monaco;
+  const fi = ed.getOption(m.editor.EditorOption.fontInfo), lh = ed.getOption(m.editor.EditorOption.lineHeight);
+  const cw = fi.typicalHalfwidthCharacterWidth || 7.8;
+  const width = Math.max(240, ed.getLayoutInfo().contentWidth - 24);
+  const mark = commentMark(f.path);
+  ed.changeViewZones((acc) => {
+    CP.zones.forEach((id) => acc.removeZone(id));
+    CP.zones = [];
+    for (const r of f.removed) {
+      const node = document.createElement('div');
+      node.className = 'mo-removed';
+      node.innerHTML = r.lines.map((t) => `<div class="mo-rm-line"><span class="mo-rm-sign">−</span>${esc(t) || ' '}</div>`).join('');
+      CP.zones.push(acc.addZone({afterLineNumber: r.after, heightInPx: r.lines.length * lh, domNode: node, ordinal: 0}));
+    }
+    for (const an of f.anns) {
+      const indent = (f.model.getLineContent(an.first).match(/^\s*/)[0] || '').replace(/\t/g, '    ').length;
+      const node = document.createElement('div');
+      node.className = 'mo-ann';
+      node.style.paddingLeft = Math.round(indent * cw) + 'px';
+      node.innerHTML = `<span class="mo-ann-mark">${esc(mark)}</span> ${an.html}`;
+      const cols = Math.max(24, Math.floor((width - indent * cw) / cw) - 3);
+      const rows = Math.max(1, Math.ceil(node.textContent.length / cols));
+      CP.zones.push(acc.addZone({afterLineNumber: an.first - 1, heightInPx: rows * lh + 4, domNode: node, ordinal: 1}));
+    }
+  });
+}
+
+function renderFallback(f) {
+  const lines = (f.text || '').split('\n');
+  const hl = highlight(lines, langOf(f.path));
+  const mark = commentMark(f.path);
+  const annAt = {}, rmAt = {};
+  f.anns.forEach((an) => (annAt[an.first] = annAt[an.first] || []).push(an));
+  f.removed.forEach((r) => (rmAt[r.after] = rmAt[r.after] || []).push(r));
+  const removedRows = (n) => (rmAt[n] || []).map((r) => r.lines.map((t) => `<div class="r rm"><span class="n"></span><span class="t"><span class="mo-rm-sign">−</span>${esc(t)}</span></div>`).join('')).join('');
+  let h = removedRows(0);
+  lines.forEach((_, i) => {
+    const n = i + 1;
+    for (const an of annAt[n] || []) {
+      const indent = (lines[i].match(/^\s*/)[0] || '').length;
+      h += `<div class="r ann"><span class="n"></span><span class="t" style="padding-left:${indent}ch"><span class="mo-ann-mark">${esc(mark)}</span> ${an.html}</span></div>`;
+    }
+    h += `<div class="r${f.added.has(n) ? ' add' : ''}${f.deleted ? ' del' : ''}" data-n="${n}"><span class="n">${n}</span><span class="t">${hl[i] || ' '}</span></div>`;
+    h += removedRows(n);
+  });
+  $('#cpbody').innerHTML = `<div class="fv">${f.text == null ? '<p class="mute" style="padding:16px">This file is too large or not text, so the page cannot show it. The notes on the left still cover its changes.</p>' : h}</div>`;
+}
+
+function focusLines(a, b) {
+  if (CP.fallback) {
+    $$('#cpbody .r.focus').forEach((r) => r.classList.remove('focus'));
+    for (let n = a; n <= b; n++) { const row = $(`#cpbody .r[data-n="${n}"]`); if (row) row.classList.add('focus'); }
+    const first = $(`#cpbody .r[data-n="${a}"]`);
+    if (first) first.scrollIntoView({block: 'center'});
+    return;
+  }
+  const m = CP.monaco;
+  CP.focusDecos = CP.editor.deltaDecorations(CP.focusDecos, [{range: new m.Range(a, 1, b, 1), options: {isWholeLine: true,
+    className: 'mo-focus-line', linesDecorationsClassName: 'mo-focus-gutter', minimap: {color: '#e3b341', position: 1}, overviewRuler: {color: '#e3b341', position: 4}}}]);
+  CP.editor.revealLinesInCenter(a, b, 0);
+  const body = $('#cpbody');
+  body.classList.remove('flash');
+  void body.offsetWidth;
+  body.classList.add('flash');
+}
+
+function showFile(path, a, b) {
+  const f = CP.byPath[path];
+  if (!f) return;
+  document.body.classList.add('code-open');
+  if (CP.current !== path) {
+    if (!CP.fallback && CP.editor && CP.current) CP.views[CP.current] = CP.editor.saveViewState();
+    CP.current = path;
+    renderTabs();
+    renderBar(f);
+    if (CP.fallback) renderFallback(f);
+    else {
+      CP.focusDecos = CP.editor.deltaDecorations(CP.focusDecos, []);
+      CP.editor.setModel(f.model);
+      applyDecorations(f);
+      applyZones(f);
+      if (!a && CP.views[path]) CP.editor.restoreViewState(CP.views[path]);
+    }
+  }
+  if (a) focusLines(a, b || a);
+}
+
+function startCodePane(first) {
+  if (!CP.files.length) buildCodeFiles();
+  if (!CP.files.length) { document.body.classList.remove('with-code'); return; }
+  const go = () => { showFile(first ? first.path : CP.files[0].path, first && first.a, first && first.b); document.body.classList.remove('code-open'); };
+  const fallback = (why) => {
+    CP.fallback = true;
+    CP.current = null;
+    $('#cpbody').classList.add('plain');
+    go();
+    $('#cpbar').insertAdjacentHTML('beforeend', `<span class="mute" title="${esc(String(why || ''))}">plain viewer (the editor could not load)</span>`);
+  };
+  loadMonaco().then((monaco) => {
+    CP.monaco = monaco;
+    for (const f of CP.files) f.model = monaco.editor.createModel(f.text == null ? '// This file is too large or not text, so the page cannot show it.' : f.text, monacoLang(f.path));
+    CP.editor = monaco.editor.create($('#cpbody'), {readOnly: true, domReadOnly: true, automaticLayout: true, theme: 'vs',
+      minimap: {enabled: true, renderCharacters: false}, fontSize: 13, lineHeight: 20, scrollBeyondLastLine: false,
+      renderLineHighlight: 'none', glyphMargin: false, folding: true, lineNumbersMinChars: 4, contextmenu: false, wordWrap: 'off'});
+    let t = null;
+    CP.editor.onDidLayoutChange(() => { clearTimeout(t); t = setTimeout(() => { const f = CP.byPath[CP.current]; if (f) applyZones(f); }, 150); });
+    go();
+  }).catch(fallback);
+}
+
+// Anything with data-file (a code link in the text, a clickable heading, step, risk or change card) opens its lines.
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { showFile(tab.dataset.tab); return; }
+  const el = e.target.closest('[data-file]');
+  const link = e.target.closest('a');
+  if (link && !link.classList.contains('cl')) {
+    // Lesson and outside links keep their own behavior; an in-page link inside a code item also opens the code.
+    if (!el || !(link.getAttribute('href') || '').startsWith('#')) return;
+    showFile(el.dataset.file, +el.dataset.a || 0, +el.dataset.b || +el.dataset.a || 0);
+    return;
+  }
+  if (!el || el.closest('#codepane')) return;
+  e.preventDefault();
+  showFile(el.dataset.file, +el.dataset.a || 0, +el.dataset.b || +el.dataset.a || 0);
+});
 
 // ------------------------------------------------------------ pages
 function nav(items, sub) {
@@ -437,6 +666,9 @@ const SOURCE = {
 
 function renderPR() {
   const K = D.content, X = D.diff;
+  buildCodeFiles();
+  const R = K.code_refs || {};
+  const head = (id, title) => `<h2${R[id] ? ` class="codehead"${codeAttrs(R[id])}` : ''}>${title}${R[id] ? '<span class="codeicon">show the code</span>' : ''}</h2>`;
   const byPath = Object.fromEntries(X.files.map((f) => [f.path, f]));
   const adds = X.files.reduce((a, f) => a + f.added, 0), dels = X.files.reduce((a, f) => a + f.deleted, 0);
   const sib = D.siblings || [], idx = sib.findIndex((p) => p.id === P.id), prev = sib[idx - 1], next = sib[idx + 1];
@@ -451,27 +683,33 @@ function renderPR() {
     <div class="card blue"><p><b>How to read this page.</b> The review guide says where to look first. Underlined words open a short lesson on the side. Folded parts open when clicked. Each change links to its line on GitHub, where you can leave a comment.</p></div>
   </section>
   ${renderReviewGuide(K, byPath)}
-  <section id="ba"><h2>Before and after</h2><div class="ba"><div class="before"><h5>Before</h5>${K.before_after.before}</div><div class="after"><h5>With this PR</h5>${K.before_after.after}</div></div></section>
-  ${K.background ? `<section id="background"><h2>Background</h2>${K.background}</section>` : ''}
-  <section id="problem"><h2>The problem</h2>${K.problem}${(K.diagrams || []).map(renderDiagram).join('')}</section>
-  <section id="thinking"><h2>How the change was worked out</h2><p><span class="pill ${src[0]}">${src[1]}</span></p>
-    <ol class="steps">${(T.steps || []).map((s) => `<li><h4>${esc(s.title)}</h4>${s.html}</li>`).join('')}</ol>
-    ${(T.options || []).length ? `<h3>The options weighed</h3>${T.options.map((o) => `<div class="option ${o.verdict}"><h4>${esc(o.name)} <span class="pill ${o.verdict === 'chosen' ? 'green' : ''}">${o.verdict === 'chosen' ? 'chosen' : 'not chosen'}</span></h4>${o.html}${o.why ? `<div><b>Why:</b> ${o.why}</div>` : ''}</div>`).join('')}` : ''}
+  <section id="ba">${head('before_after', 'Before and after')}<div class="ba"><div class="before"><h5>Before</h5>${K.before_after.before}</div><div class="after"><h5>With this PR</h5>${K.before_after.after}</div></div></section>
+  ${K.background ? `<section id="background">${head('background', 'Background')}${K.background}</section>` : ''}
+  <section id="problem">${head('problem', 'The problem')}${K.problem}${(K.diagrams || []).map(renderDiagram).join('')}</section>
+  <section id="thinking">${head('thinking', 'How the change was worked out')}<p><span class="pill ${src[0]}">${src[1]}</span></p>
+    <ol class="steps">${(T.steps || []).map((s) => `<li${s.code ? ` class="codeitem"${codeAttrs(s.code)}` : ''}><h4>${esc(s.title)}${s.code ? '<span class="codeicon">show the code</span>' : ''}</h4>${s.html}</li>`).join('')}</ol>
+    ${(T.options || []).length ? `<h3>The options weighed</h3>${T.options.map((o) => `<div class="option ${o.verdict}${o.code ? ' codeitem' : ''}"${codeAttrs(o.code)}><h4>${esc(o.name)} <span class="pill ${o.verdict === 'chosen' ? 'green' : ''}">${o.verdict === 'chosen' ? 'chosen' : 'not chosen'}</span></h4>${o.html}${o.why ? `<div><b>Why:</b> ${o.why}</div>` : ''}</div>`).join('')}` : ''}
     ${T.decision ? `<h3>The decision</h3>${T.decision}` : ''}
     ${T.lesson ? `<div class="card amber"><h4>The habit to take away</h4>${T.lesson}</div>` : ''}
   </section>
-  <section id="code"><h2>The code, change by change</h2><div class="legend"><span class="la">added line</span><span class="ld">removed line</span><span class="lc">unchanged context</span></div>
+  <section id="code"><h2>The code, change by change</h2><p class="mute">Click a card to open its lines in the editor. The code there carries comments that explain it line by line; they belong to this page, not the PR.</p>
     ${K.files.map((f, fi) => renderFile(f, byPath[f.path], fi)).join('')}
   </section>
-  <section id="proof"><h2>How we know it works</h2>${K.tests || ''}
+  <section id="proof">${head('tests', 'How we know it works')}${K.tests || ''}
     ${D.tests && D.tests.rows ? `<h3>The tests, before and after</h3>${renderTests(D.tests)}` : ''}
   </section>
-  <section id="risks"><h2>What could go wrong</h2>${(K.risks || []).map((r) => `<div class="card"><div>${r.risk}</div><div style="margin-top:6px"><b>Answer:</b> ${r.answer}</div></div>`).join('')}</section>
+  <section id="risks">${head('risks', 'What could go wrong')}${(K.risks || []).map((r) => `<div class="card${r.code ? ' codeitem' : ''}"${codeAttrs(r.code)}><div>${r.risk}</div><div style="margin-top:6px"><b>Answer:</b> ${r.answer}</div></div>`).join('')}</section>
   <section id="basics"><h2>The basics, from the ground up</h2><details><summary>Every idea this PR uses, from the most basic (${(D.ladder || []).length} lessons). Underlined words in the page open the same lessons.</summary>${lessonsHtml(D.ladder || [])}</details></section>`;
   $('#main').innerHTML = h;
   const rt = readingMinutes($('#main'));
   const kicker = document.querySelector('#top .kicker');
   if (kicker) kicker.insertAdjacentHTML('beforeend', ` · about ${rt.minutes} min to read`);
+  document.body.classList.add('with-code');
+  const lf = ((K.review || {}).look_first || [])[0];
+  const firstChunk = K.files.find((f) => !isSecondary(f.path) && (f.chunks || []).some((c) => c.new));
+  const first = lf && lf.new ? {path: lf.path, a: lf.new[0], b: lf.new[1]}
+    : firstChunk ? (() => { const c = firstChunk.chunks.find((x) => x.new); return {path: firstChunk.path, a: c.new[0], b: c.new[1]}; })() : null;
+  startCodePane(first);
   nav([{id: 'top', label: 'Summary'}, {id: 'guide', label: 'Review guide'}, {id: 'ba', label: 'Before and after'},
     ...(K.background ? [{id: 'background', label: 'Background'}] : []), {id: 'problem', label: 'The problem'}, {id: 'thinking', label: 'How it was worked out'},
     {part: 'Code'}, {id: 'code', label: 'Change by change'}, {id: 'proof', label: 'How we know it works'}, {id: 'risks', label: 'What could go wrong'},

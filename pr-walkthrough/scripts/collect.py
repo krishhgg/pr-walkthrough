@@ -200,6 +200,7 @@ def collect_pr(t: dict, clone: str | None, context: int) -> dict:
             git(clone, 'fetch', '-q', remote, f'+pull/{n}/head:{ref}', f'+{meta["baseRefName"]}:{ref}-base')
             base = git(clone, 'merge-base', f'{ref}-base', ref).strip()
             meta['diff_from'] = base
+            meta['head_ref'] = ref
             raw = git(clone, 'diff', f'-U{context}', '--no-color', f'{base}..{ref}')
             meta['diff_source'] = 'git'
     if raw is None:
@@ -269,6 +270,38 @@ def find_stack_parents(items: list, clone: str | None, context: int) -> None:
             m['diff_scope'] = 'own commits (the parent PR is reviewed on its own page)'
 
 
+# ------------------------------------------------------------------ whole files
+
+MAX_FILE_CHARS = 400_000  # larger files are left out of the code pane; the diff still covers them
+
+
+def make_reader(meta: dict, clone: str | None):
+    """Return read(path, side) giving a file's whole text at the head ('head') or base ('base') commit."""
+    head_ref = meta.get('head_ref') or meta.get('head_sha')
+    base_ref = meta.get('diff_from') or meta.get('baseRefOid')
+    use_git = bool(clone and meta.get('diff_source') == 'git')
+
+    def read(path: str, side: str):
+        ref = head_ref if side == 'head' else base_ref
+        if not ref:
+            return None
+        if use_git:
+            r = subprocess.run(['git', '-C', clone, 'show', f'{ref}:{path}'], capture_output=True)
+            raw = r.stdout if r.returncode == 0 else None
+        else:
+            r = subprocess.run(['gh', 'api', '-H', 'Accept: application/vnd.github.raw',
+                                f'repos/{meta["repo"]}/contents/{path}?ref={ref}'], capture_output=True)
+            raw = r.stdout if r.returncode == 0 else None
+        if raw is None or b'\x00' in raw[:8000] or len(raw) > MAX_FILE_CHARS:
+            return None
+        try:
+            return raw.decode('utf-8')
+        except UnicodeDecodeError:
+            return None
+
+    return read
+
+
 # ------------------------------------------------------------------ writing
 
 
@@ -294,6 +327,14 @@ def write(item: dict, out: Path) -> dict:
                 if (folder / name).exists():
                     shutil.move(str(folder / name), str(dest / name))
     files = parse_diff(item['raw'])
+    read = make_reader(meta, item.get('clone'))
+    for f in files:
+        if f.get('binary'):
+            continue
+        if f['status'] == 'deleted':
+            f['base_text'] = read(f['old_path'], 'base')
+        else:
+            f['head_text'] = read(f['path'], 'head')
     diff = {'head_sha': meta['head_sha'], 'diff_from': meta.get('diff_from'), 'files': files}
     (folder / 'meta.json').write_text(json.dumps(meta, indent=1))
     (folder / 'diff.json').write_text(json.dumps(diff, indent=1))
@@ -324,6 +365,8 @@ def main() -> None:
             ap.error('nothing to collect: give PR numbers or URLs, --mine, or --branch')
         items = [collect_pr(t, clone, args.context) if t['kind'] == 'pr' else collect_branch(t, clone, args.context)
                  for t in targets]
+        for it in items:
+            it['clone'] = clone
         find_stack_parents(items, clone, args.context)
         out = Path(args.out).expanduser()
         summary = [write(it, out) for it in items]

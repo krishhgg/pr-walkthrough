@@ -34,6 +34,10 @@ everything under "Checks" and refuses to build a page that fails them.
     {
       "path": "src/cache.py",
       "role": "<p>What this file is for, in one sentence.</p>",
+      "annotations": [
+        {"line": 40, "text": "Take the lock before reading, so no other thread can change the entry between the read and the write."},
+        {"lines": [41, 46], "text": "Using a [[for-loop|for loop]] because each pending key is checked on its own; step by step it reads the key, skips it if it expired, and keeps the rest."}
+      ],
       "chunks": [
         {"new": [40, 58], "html": "<p>What these lines do and why.</p>", "check": "That the lock is released on the error path too.", "risk": "high"},
         {"old": [12, 15], "new": [12, 13], "html": "<p>A replacement: old lines out, new lines in.</p>", "fold": true},
@@ -41,10 +45,36 @@ everything under "Checks" and refuses to build a page that fails them.
       ]
     }
   ],
+  "code_refs": {"problem": "src/cache.py:40-58", "before_after": "src/cache.py:40-58", "tests": "tests/test_cache.py:1-40"},
   "tests": "<p>How the tests prove the change: what each new test checks and whether it fails without the fix.</p>",
   "risks": [{"risk": "<p>What could go wrong.</p>", "answer": "<p>Why it won't, or how it is handled.</p>"}]
 }
 ```
+
+## The code pane: whole files, comments that explain them, and links into them
+
+The page shows the PR's changed files on the right, in an editor (Monaco, the editor inside VS Code),
+one tab per file, with added lines highlighted and removed lines shown in red where they were. The
+text on the left drives it: clicking a link, a heading, a step, a risk or a change card opens the file
+and highlights the lines.
+
+- `files[].annotations` are explanatory comments drawn above code lines in the editor. They are part
+  of the page only, never of the PR, and they do not shift line numbers (which stay the file's own and
+  match GitHub). Each has `line` (or `lines: [first, last]` for a group of lines) on the new side and
+  a `text` of one or two short sentences. Say what the lines do and why this way of writing them:
+  "Using a for loop because each key is checked on its own; step by step it reads the key, skips it if
+  it expired, and keeps the rest." Never just name the syntax. Lesson links work inside.
+- Coverage: in every changed source file, the annotations must cover at least 90% of the added lines
+  that carry code (blank lines, comments, docstrings and lone brackets do not count). One annotation
+  may cover a group of lines that form one step. Test files are recommended, not required; one
+  annotation per test is plenty. Explain removed code in the chunk note, or annotate the line where it
+  used to be ("Removed here: ...").
+- Code links in any text: `[[path:40-58|shown text]]` (or `[[path:40|...]]`) opens that file at those
+  lines. The path is the file's path in the diff; lines are on the new side.
+- `code_refs` makes a section heading open code: keys `before_after`, `background`, `problem`,
+  `thinking`, `tests`, `risks`, each `"path:first-last"`. Thinking steps, options and risks may carry
+  their own `"code": "path:first-last"` too. Change cards and look-first items open their lines by
+  themselves.
 
 ## The review fields
 
@@ -113,3 +143,5 @@ open code lines.
 - Every changed line is covered exactly once; every chunk hits a diff line; chunks do not overlap.
 - `review.look_first` has 1 or more items, each pointing at real lines, with a `why`; `risk` values
   are `low`, `medium` or `high`; `thinking.source` is one of the three sources.
+- Every code link, `code` field and `code_refs` value names a changed file and lines inside it.
+- Annotations sit on real lines and cover at least 90% of the added code lines of each source file.

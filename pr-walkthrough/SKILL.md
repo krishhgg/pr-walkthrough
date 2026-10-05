@@ -8,7 +8,8 @@ description: Turn pull requests (or local branches) into local HTML walkthrough 
 Make one self-contained HTML page per pull request: a review guide on top (change map, where to look
 first, questions for the author), then a walkthrough that explains every changed line with the
 reasoning behind it, the tests, the risks, and a library of lessons for any term a reader does not
-know. Pages stay on the reader's machine; nothing is posted anywhere.
+know. The changed files sit in a VS Code style editor beside the text, with comments that explain the
+code line by line, and clicking any part of the text opens the lines it talks about. Pages stay on the reader's machine; nothing is posted anywhere.
 
 Everything a page says must be checkable against the diff, and the builder enforces it: every added
 or removed line has exactly one note, every link resolves, and the page reads in about 10 minutes.
@@ -63,6 +64,11 @@ Read `references/authoring.md` (the order of work and the judgment calls), `refe
 - **Walkthrough.** Summary, before and after, the problem, how the change was worked out, then every
   changed file in reading order, lines grouped into chunks by idea. Fold supporting chunks so the page
   stays near 10 minutes; tests, docs and lock files fold by themselves.
+- **The code beside the text.** The page shows every changed file in an editor on the right, and the
+  text drives it. Write `annotations` (comments drawn between the code lines, page only, never in the
+  PR) that explain the added code step by step: what each step does and why it is written that way.
+  They must cover at least 90% of the added code lines of each source file. Link claims to lines with
+  `[[path:first-last|text]]`, and give sections `code_refs` so clicking a heading opens its code.
 - **Lessons.** List the ideas the code uses in `concepts`; link terms with `[[lesson-id|text]]`. The
   library is in `lessons/` (general programming in `core.json`, LLM apps and agents in
   `pack-ai-agents.json`). Add a missing lesson to `<repo-folder>/lessons.json` rather than defining
